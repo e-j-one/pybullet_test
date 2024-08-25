@@ -2,8 +2,15 @@ import pybullet as p
 import pybullet_data
 
 
-# Function to set joint angles and get end-effector position
-def get_end_effector_position(joint_positions, robotUid):
+def print_robot_links(robotUid):
+    num_joints = p.getNumJoints(robotUid)
+    for i in range(num_joints):
+        joint_info = p.getJointInfo(robotUid, i)
+        print(f"Link index: {i}, Link name: {joint_info[12].decode('utf-8')}")
+
+
+# Function to move the robot joints to a specified configuration
+def move_robot_joints(joint_positions, robotUid):
     for i, joint_position in enumerate(joint_positions):
         p.setJointMotorControl2(
             bodyUniqueId=robotUid,
@@ -11,14 +18,16 @@ def get_end_effector_position(joint_positions, robotUid):
             controlMode=p.POSITION_CONTROL,
             targetPosition=joint_position,
         )
-
-    # Step simulation to update the position
+    # Step simulation to apply the new joint positions
     p.stepSimulation()
 
+
+# Function to get the current position of the end-effector
+def get_end_effector_position(robotUid):
     # Get the state of the end-effector link (ee_link)
     end_effector_state = p.getLinkState(
         bodyUniqueId=robotUid,
-        linkIndex=7,  # The index of the end-effector link (usually the last link)
+        linkIndex=6,  # The index of the end-effector link (usually the last link)
         computeForwardKinematics=True,
     )
 
@@ -54,7 +63,7 @@ def spawn_obstacles(obstacle_positions, obstacle_dimensions):
         )
 
 
-if __name__ == "__main__":
+def main():
     p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
@@ -72,12 +81,23 @@ if __name__ == "__main__":
         [0.1, 0.1, 0.4],
     ]
 
-    spawn_robot(urdf_path=urdf_path)
+    robotUid = spawn_robot(urdf_path=urdf_path)
     spawn_obstacles(
         obstacle_positions=obstacle_positions, obstacle_dimensions=obstacle_dimensions
     )
 
+    # print_robot_links(robotUid=robotUid)
+
+    joint_positions = [0.5, -0.5, 0.3, -1.0, 0.5, 0.5]
+    move_robot_joints(joint_positions=joint_positions, robotUid=robotUid)
+
+    ee_pose = get_end_effector_position(robotUid=robotUid)
+    print("End-effector position:", ee_pose)
+
     # Keep the simulation running without gravity
     while p.isConnected():
         p.stepSimulation()
-    pass
+
+
+if __name__ == "__main__":
+    main()
