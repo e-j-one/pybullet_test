@@ -16,8 +16,12 @@ def print_joint_positions(robot_uid):
         print(f"Joint {i}: {joint_name}, \tPosition: {joint_position:.3f}")
 
 
-def set_joint_positions(robot_uid, joint_ids, joint_states):
-    assert len(joint_ids) == len(joint_states)
+def set_joint_positions(
+    robot_uid: int, joint_ids: List[int], joint_states: List[float]
+):
+    assert len(joint_ids) == len(
+        joint_states
+    ), "joint_ids and joint_states must have the same length"
 
     for joint_id, joint_values in zip(joint_ids, joint_states):
         p.resetJointState(robot_uid, joint_id, joint_values)

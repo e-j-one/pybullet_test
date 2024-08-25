@@ -23,7 +23,7 @@ def test_collision_check():
 
     urdf_path = "urdf/ur5.urdf"
 
-    start_state = [3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]
+    start_state = np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
 
     start_ee_pos = [-0.343, -0.191, 0.847]
     goal_ee_pos = [0.162, -0.192, 0.906]
@@ -69,9 +69,28 @@ def test_collision_check():
     #     print(is_collision(joint_state))
     #     print("ee pose: ", bullet_obj_utils.get_end_effector_position(robot_uid))
 
-    while p.isConnected():
-        pass
-        # p.stepSimulation()
+    # while p.isConnected():
+    #     pass
+    #     # p.stepSimulation()
+
+    rrt_path = np.array([
+        np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
+        np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
+        np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
+    ])
+
+    while True:
+        if not draw_path:
+            for q in rrt_path:
+                cur_world_pos = p.getLinkState(robot_uid, 6)[0]
+                draw_sphere_marker(cur_world_pos, 0.02, 
+                    [1, 0, 0, 1])
+            draw_path = True
+        
+        for q in rrt_path:
+            set_joint_positions(robot_uid, UR5_JOINT_INDICES, q)
+            time.sleep(0.3)
+
 
 
 if __name__ == "__main__":
