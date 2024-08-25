@@ -30,14 +30,6 @@ def test_collision_check():
 
     plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
 
-    joint_states = [
-        # [3.14, 0.0, 0.0, 0.0, 0.0, 0.0],
-        # [3.14, -np.pi * 0.125, 0.0, 0.0, 0.0, 0.0],
-        [3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0],
-        [3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0],
-        [3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0],
-    ]
-
     obstacle_positions = [
         # [0.5, 0.0, 0.0],
         [0.0, 0.5, 0.0],
@@ -50,21 +42,32 @@ def test_collision_check():
         [0.1, 0.1, 0.4],
     ]
 
+    # spawn plane
     plane_uid = p.loadURDF("plane.urdf")
+
+    # spawn robot
     robot_uid = bullet_obj_utils.spawn_robot(urdf_path=urdf_path)
+    non_fixed_joint_uids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
+
+    # spawn obstacles
     spawned_obstacle_uids = bullet_obj_utils.spawn_obstacles(
         obstacle_positions, obstacle_dimensions
     )
-
     obstacle_uids = [plane_uid] + spawned_obstacle_uids
 
-    non_fixed_joint_uids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
+    # joint_states = [
+    #     # [3.14, 0.0, 0.0, 0.0, 0.0, 0.0],
+    #     # [3.14, -np.pi * 0.125, 0.0, 0.0, 0.0, 0.0],
+    #     [3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0],
+    #     [3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0],
+    #     [3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0],
+    # ]
 
     is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacle_uids)
 
-    for joint_state in joint_states:
-        print(is_collision(joint_state))
-        print("ee pose: ", bullet_obj_utils.get_end_effector_position(robot_uid))
+    # for joint_state in joint_states:
+    #     print(is_collision(joint_state))
+    #     print("ee pose: ", bullet_obj_utils.get_end_effector_position(robot_uid))
 
     while p.isConnected():
         pass
