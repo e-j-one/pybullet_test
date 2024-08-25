@@ -1,13 +1,9 @@
-import pybullet as p
 from itertools import product
 from typing import List
 
+import pybullet as p
 
-def set_joint_positions(robot_uid, joint_ids, joint_states):
-    assert len(joint_ids) == len(joint_states)
-
-    for joint_id, joint_values in zip(joint_ids, joint_states):
-        p.resetJointState(robot_uid, joint_id, joint_values)
+from utils.bullet_obj_utils import set_joint_positions
 
 
 def is_joint_state_in_limits(robot_uid: int, joint_states: List[float]) -> bool:

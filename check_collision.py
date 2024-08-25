@@ -2,31 +2,8 @@ import pybullet as p
 import pybullet_data
 import numpy as np
 
-from collision_utils import get_collision_fn
-
-
-def print_joint_positions(robot_uid):
-    num_joints = p.getNumJoints(robot_uid)
-
-    print("Joint positions for robot UID:", robot_uid)
-    for i in range(num_joints):
-        joint_info = p.getJointInfo(robot_uid, i)
-        # print("joint_info[8]:", joint_info[8])
-        # print("joint_info[9]:", joint_info[9])
-        joint_name = joint_info[1].decode("utf-8")
-        joint_position = p.getJointState(robot_uid, i)[0]
-        print(f"Joint {i}: {joint_name}, \tPosition: {joint_position:.3f}")
-
-
-def get_non_fixed_joints(robot_uid):
-    num_joints = p.getNumJoints(robot_uid)
-    non_fixed_joints = []
-    for i in range(num_joints):
-        joint_info = p.getJointInfo(robot_uid, i)
-        joint_type = joint_info[2]
-        if joint_type != p.JOINT_FIXED:
-            non_fixed_joints.append(i)
-    return non_fixed_joints
+from utils.collision_utils import get_collision_fn
+import utils.bullet_obj_utils as bullet_obj_utils
 
 
 # Function to move the robot joints to a specified configuration
@@ -108,41 +85,6 @@ def check_collision(robot_uid):
     return False
 
 
-def can_move_without_collision(
-    start_pos, end_pos, robot_uid, steps=100, threshold=1e-3
-):
-    interpolated_positions = interpolate_positions(start_pos, end_pos, steps)
-
-    for step in range(steps):
-        joint_positions = [pos[step] for pos in interpolated_positions]
-        move_robot_joints(joint_positions, robot_uid)
-
-        if check_collision(robot_uid):
-            print(f"Collision detected at step {step}!")
-            return False
-
-        # Optional: Ensure convergence after each step
-        converged = False
-        for _ in range(100):
-            p.stepSimulation()
-            current_positions = [
-                p.getJointState(robot_uid, i)[0] for i in range(len(joint_positions))
-            ]
-            errors = [
-                abs(current_positions[i] - joint_positions[i])
-                for i in range(len(joint_positions))
-            ]
-            if all(error < threshold for error in errors):
-                converged = True
-                break
-        if not converged:
-            print(f"Failed to converge at step {step}.")
-            return False
-
-    print("Movement is possible without collision.")
-    return True
-
-
 def main():
     """
     1. spawn floor and obstacles
@@ -160,18 +102,6 @@ def main():
 
     urdf_path = "urdf/ur5.urdf"
 
-    obstacle_positions = [
-        # [0.5, 0.0, 0.0],
-        [0.0, 0.5, 0.0],
-        [0.0, 0.0, 0.5],
-    ]
-
-    obstacle_dimensions = [
-        # [0.2, 0.1, 0.1],
-        [0.1, 0.3, 0.1],
-        [0.1, 0.1, 0.4],
-    ]
-
     plane_uid = p.loadURDF("plane.urdf")
     robot_uid = spawn_robot(urdf_path=urdf_path)
 
@@ -184,10 +114,6 @@ def main():
 
     print("robot uid:", robot_uid)
     obstacles_uid = [plane_uid, cuboid_id]
-
-    # spawn_obstacles(
-    #     obstacle_positions=obstacle_positions, obstacle_dimensions=obstacle_dimensions
-    # )
 
     # joint_positions = [1.57, 0.0, 0.0, 0.0, 0.0, 0.0]
 
@@ -210,9 +136,9 @@ def main():
     # for i in range(1000):
     #     p.stepSimulation()
 
-    print_joint_positions(robot_uid=robot_uid)
+    bullet_obj_utils.print_joint_positions(robot_uid=robot_uid)
 
-    non_fixed_joint_uids = get_non_fixed_joints(robot_uid)
+    non_fixed_joint_uids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
 
     is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacles_uid)
 
