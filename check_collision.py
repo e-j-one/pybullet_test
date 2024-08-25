@@ -56,7 +56,7 @@ def get_end_effector_position(robot_uid):
 
     return end_effector_position
 
-# 
+
 def spawn_robot(urdf_path):
     robot_uid = p.loadURDF(
         urdf_path,
@@ -66,9 +66,9 @@ def spawn_robot(urdf_path):
     return robot_uid
 
 
-# def spawn_obstacles(obstacle_positions, obstacle_dimensions):
-#     # Spawn cuboid obstacles with given positions and dimensions
-#     for position, dimensions in zip(obstacle_positions, obstacle_dimensions):
+def spawn_obstacles(obstacle_positions, obstacle_dimensions):
+    # Spawn cuboid obstacles with given positions and dimensions
+    for position, dimensions in zip(obstacle_positions, obstacle_dimensions):
         collision_shape = p.createCollisionShape(
             shapeType=p.GEOM_BOX, halfExtents=[dim / 2 for dim in dimensions]
         )
