@@ -3,7 +3,7 @@ from typing import List
 
 import pybullet as p
 
-from utils.bullet_obj_utils import set_joint_positions
+import utils.bullet_obj_utils as bullet_obj_utils
 
 
 def is_joint_state_in_limits(robot_uid: int, joint_states: List[float]) -> bool:
@@ -70,7 +70,7 @@ def get_collision_fn(
             print("Joint state is out of limits")
             return True
 
-        set_joint_positions(robot_uid, joint_ids, q)
+        bullet_obj_utils.set_joint_positions(robot_uid, joint_ids, q)
 
         for link1, link2 in non_adjacent_pairs:
             if is_link_in_collision(robot_uid, link1, link2):
