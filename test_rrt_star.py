@@ -5,7 +5,9 @@ import pybullet as p
 import pybullet_data
 
 from utils.collision_utils import get_collision_fn
+
 import utils.bullet_obj_utils as bullet_obj_utils
+import utils.plot_utils as plot_utils
 
 
 def test_collision_check():
@@ -21,9 +23,16 @@ def test_collision_check():
 
     urdf_path = "urdf/ur5.urdf"
 
+    start_state = [3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]
+
+    start_ee_pos = [-0.343, -0.191, 0.847]
+    goal_ee_pos = [0.162, -0.192, 0.906]
+
+    plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
+
     joint_states = [
-        [3.14, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [3.14, -np.pi * 0.125, 0.0, 0.0, 0.0, 0.0],
+        # [3.14, 0.0, 0.0, 0.0, 0.0, 0.0],
+        # [3.14, -np.pi * 0.125, 0.0, 0.0, 0.0, 0.0],
         [3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0],
         [3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0],
         [3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0],
@@ -55,6 +64,7 @@ def test_collision_check():
 
     for joint_state in joint_states:
         print(is_collision(joint_state))
+        print("ee pose: ", bullet_obj_utils.get_end_effector_position(robot_uid))
 
     while p.isConnected():
         pass
