@@ -65,8 +65,6 @@ def get_collision_fn(
     robot_body_uids = [robot_uid]
     check_body_uid_pairs = list(product(robot_body_uids, obstacles))
 
-    # p.getJointInfo(robot_uid, 0)
-
     print("============================================")
     print("========== non_adjacent_pairs:", non_adjacent_pairs)
     print("========== check_body_uid_pairs:", check_body_uid_pairs)

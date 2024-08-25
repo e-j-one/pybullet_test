@@ -176,14 +176,14 @@ def main():
     robot_uid = spawn_robot(urdf_path=urdf_path)
 
     # Load the cuboid URDF
-    # cuboid_id = p.loadURDF(
-    #     "cube_small.urdf",  # URDF file for the cuboid
-    #     basePosition=[0.0, 0.0, 0.18],
-    #     # baseOrientation=orientation,
-    # )
+    cuboid_id = p.loadURDF(
+        "cube_small.urdf",  # URDF file for the cuboid
+        basePosition=[0.0, 0.0, 0.5],
+        # baseOrientation=orientation,
+    )
 
     print("robot uid:", robot_uid)
-    obstacles_uid = [plane_uid]
+    obstacles_uid = [plane_uid, cuboid_id]
 
     # spawn_obstacles(
     #     obstacle_positions=obstacle_positions, obstacle_dimensions=obstacle_dimensions
@@ -199,6 +199,8 @@ def main():
 
     start_pos = [0.0, -np.pi * 0.25, 0.0, 0.0, 0.0, 0.0]
     end_pos = [1.57, -np.pi * 0.25, 0.0, 0.0, 0.0, 0.0]
+    pos_3 = [3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]
+    pos_4 = [3.14, -np.pi * 0.25, 0.0, 0.0, 0.0, 0.0]
 
     # if can_move_without_collision(start_pos, end_pos, robot_uid, steps=100):
     #     print("The robot can move from start to end without collision.")
@@ -216,6 +218,10 @@ def main():
 
     print(is_collision(start_pos))
     print(is_collision(end_pos))
+    print(is_collision(pos_3))
+    print(is_collision(pos_4))
+    print(is_collision(pos_3))
+    print(is_collision(pos_4))
 
     while p.isConnected():
         p.stepSimulation()
