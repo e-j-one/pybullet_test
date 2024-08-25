@@ -2,11 +2,15 @@ import pybullet as p
 import pybullet_data
 
 
-def print_robot_links(robotUid):
+def print_joint_positions(robotUid):
     num_joints = p.getNumJoints(robotUid)
+
+    print("Joint positions for robot UID:", robotUid)
     for i in range(num_joints):
         joint_info = p.getJointInfo(robotUid, i)
-        print(f"Link index: {i}, Link name: {joint_info[12].decode('utf-8')}")
+        joint_name = joint_info[1].decode("utf-8")
+        joint_position = p.getJointState(robotUid, i)[0]
+        print(f"Joint {i}: {joint_name}, \tPosition: {joint_position:.3f}")
 
 
 # Function to move the robot joints to a specified configuration
@@ -67,6 +71,13 @@ def main():
     p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
+    p.resetDebugVisualizerCamera(
+        cameraDistance=1.5,  # Distance from the target position
+        cameraYaw=30,  # Yaw angle in degrees
+        cameraPitch=-130,  # Pitch angle in degrees
+        cameraTargetPosition=[0, 0, 0],  # Target position (x, y, z)
+    )
+
     urdf_path = "urdf/ur5.urdf"
 
     obstacle_positions = [
@@ -86,15 +97,14 @@ def main():
         obstacle_positions=obstacle_positions, obstacle_dimensions=obstacle_dimensions
     )
 
-    # print_robot_links(robotUid=robotUid)
+    joint_positions = [-1.57, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-    joint_positions = [0.5, -0.5, 0.3, -1.0, 0.5, 0.5]
     move_robot_joints(joint_positions=joint_positions, robotUid=robotUid)
+    print_joint_positions(robotUid=robotUid)
 
     ee_pose = get_end_effector_position(robotUid=robotUid)
     print("End-effector position:", ee_pose)
 
-    # Keep the simulation running without gravity
     while p.isConnected():
         p.stepSimulation()
 
