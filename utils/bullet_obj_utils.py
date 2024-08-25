@@ -1,3 +1,5 @@
+from typing import List
+
 import pybullet as p
 
 
@@ -39,6 +41,27 @@ def spawn_robot(urdf_path):
         useFixedBase=True,
     )
     return robot_uid
+
+
+def spawn_obstacles(obstacle_positions, obstacle_dimensions) -> List[int]:
+    obstacle_ids = []
+    # Spawn cuboid obstacles with given positions and dimensions
+    for position, dimensions in zip(obstacle_positions, obstacle_dimensions):
+        collision_shape = p.createCollisionShape(
+            shapeType=p.GEOM_BOX, halfExtents=[dim / 2 for dim in dimensions]
+        )
+        visual_shape = p.createVisualShape(
+            shapeType=p.GEOM_BOX, halfExtents=[dim / 2 for dim in dimensions]
+        )
+
+        created_obstacle_id = p.createMultiBody(
+            baseMass=0,  # Static object, mass = 0
+            baseCollisionShapeIndex=collision_shape,
+            baseVisualShapeIndex=visual_shape,
+            basePosition=position,
+        )
+        obstacle_ids.append(created_obstacle_id)
+    return obstacle_ids
 
 
 def get_end_effector_position(robot_uid):
