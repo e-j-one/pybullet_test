@@ -80,29 +80,12 @@ def test_collision_check():
         np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
     ]
 
-    draw_path = False
-
-    while True:
-        if not draw_path:
-            for state_on_path in rrt_path:
-                bullet_obj_utils.set_joint_positions(
-                    robot_uid, non_fixed_joint_uids, state_on_path
-                )
-
-                curr_end_effectgor_pos = bullet_obj_utils.get_end_effector_position(
-                    robot_uid
-                )
-                # cur_world_pos = p.getLinkState(robot_uid, 3)[0]
-                plot_utils.draw_sphere_marker(
-                    curr_end_effectgor_pos, 0.02, [1, 0, 0, 1]
-                )
-            draw_path = True
-
-        for state_on_path in rrt_path:
-            bullet_obj_utils.set_joint_positions(
-                robot_uid, non_fixed_joint_uids, state_on_path
-            )
-            time.sleep(0.3)
+    plot_utils.plot_path_forever(
+        rrt_path,
+        non_fixed_joint_uids,
+        robot_uid,
+        plot_end_effector_pos=True,
+    )
 
 
 if __name__ == "__main__":

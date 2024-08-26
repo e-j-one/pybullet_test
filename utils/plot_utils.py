@@ -1,6 +1,9 @@
 from typing import List, Tuple
+import time
 
 import pybullet as p
+
+import utils.bullet_obj_utils as bullet_obj_utils
 
 
 def plot_start_and_goal_pos(
@@ -43,7 +46,44 @@ def plot_start_and_goal_pos(
         textSize=text_size,
     )
 
+
 def draw_sphere_marker(position, radius, color):
-   vs_id = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=color)
-   marker_id = p.createMultiBody(basePosition=position, baseCollisionShapeIndex=-1, baseVisualShapeIndex=vs_id)
-   return marker_id
+    vs_id = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=color)
+    marker_id = p.createMultiBody(
+        basePosition=position, baseCollisionShapeIndex=-1, baseVisualShapeIndex=vs_id
+    )
+    return marker_id
+
+
+def plot_path_forever(
+    path: List[List[float]],
+    joint_uids: List[int],
+    robot_uid: int,
+    hold_time: float = 0.2,
+    plot_end_effector_pos: bool = True,
+    marker_radius=0.01,
+    marker_color=[0, 0, 1, 0.5],
+):
+    while True:
+        if plot_end_effector_pos:
+            for state_on_path in path:
+                bullet_obj_utils.set_joint_positions(
+                    robot_uid, joint_uids, state_on_path
+                )
+                curr_end_effectgor_pos = bullet_obj_utils.get_end_effector_position(
+                    robot_uid
+                )
+                # cur_world_pos = p.getLinkState(robot_uid, 3)[0]
+                vs_id = p.createVisualShape(
+                    p.GEOM_SPHERE, radius=marker_radius, rgbaColor=marker_color
+                )
+                p.createMultiBody(
+                    basePosition=curr_end_effectgor_pos,
+                    baseCollisionShapeIndex=-1,
+                    baseVisualShapeIndex=vs_id,
+                )
+            plot_end_effector_pos = False
+
+        for state_on_path in path:
+            bullet_obj_utils.set_joint_positions(robot_uid, joint_uids, state_on_path)
+            time.sleep(hold_time)
