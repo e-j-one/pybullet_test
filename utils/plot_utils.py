@@ -42,3 +42,8 @@ def plot_start_and_goal_pos(
         textColorRGB=[1, 1, 1],
         textSize=text_size,
     )
+
+def draw_sphere_marker(position, radius, color):
+   vs_id = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=color)
+   marker_id = p.createMultiBody(basePosition=position, baseCollisionShapeIndex=-1, baseVisualShapeIndex=vs_id)
+   return marker_id

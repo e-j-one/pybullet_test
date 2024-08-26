@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List
+import time
 
 import pybullet as p
 import pybullet_data
@@ -73,24 +74,35 @@ def test_collision_check():
     #     pass
     #     # p.stepSimulation()
 
-    rrt_path = np.array([
+    rrt_path = [
         np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
         np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
         np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
-    ])
+    ]
+
+    draw_path = False
 
     while True:
         if not draw_path:
-            for q in rrt_path:
-                cur_world_pos = p.getLinkState(robot_uid, 6)[0]
-                draw_sphere_marker(cur_world_pos, 0.02, 
-                    [1, 0, 0, 1])
-            draw_path = True
-        
-        for q in rrt_path:
-            set_joint_positions(robot_uid, UR5_JOINT_INDICES, q)
-            time.sleep(0.3)
+            for state_on_path in rrt_path:
+                bullet_obj_utils.set_joint_positions(
+                    robot_uid, non_fixed_joint_uids, state_on_path
+                )
 
+                curr_end_effectgor_pos = bullet_obj_utils.get_end_effector_position(
+                    robot_uid
+                )
+                # cur_world_pos = p.getLinkState(robot_uid, 3)[0]
+                plot_utils.draw_sphere_marker(
+                    curr_end_effectgor_pos, 0.02, [1, 0, 0, 1]
+                )
+            draw_path = True
+
+        for state_on_path in rrt_path:
+            bullet_obj_utils.set_joint_positions(
+                robot_uid, non_fixed_joint_uids, state_on_path
+            )
+            time.sleep(0.3)
 
 
 if __name__ == "__main__":
