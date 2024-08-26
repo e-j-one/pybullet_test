@@ -47,12 +47,19 @@ def plot_start_and_goal_pos(
     )
 
 
-def draw_sphere_marker(position, radius, color):
-    vs_id = p.createVisualShape(p.GEOM_SPHERE, radius=radius, rgbaColor=color)
-    marker_id = p.createMultiBody(
-        basePosition=position, baseCollisionShapeIndex=-1, baseVisualShapeIndex=vs_id
+def plot_rail(
+    rail_length: float = 3.0, rail_width: float = 0.2, rail_color=[0.8, 0.8, 0.8, 1.0]
+) -> int:
+    rail_visual_shape = p.createVisualShape(
+        shapeType=p.GEOM_BOX,
+        halfExtents=[rail_length * 0.5, rail_width * 0.5, 0.001],
+        rgbaColor=rail_color,
     )
-    return marker_id
+    rail_uid = p.createMultiBody(
+        baseVisualShapeIndex=rail_visual_shape,
+        basePosition=[rail_length * 0.5, 0.0, 0.0],
+    )
+    return rail_uid
 
 
 def plot_path_forever(

@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Tuple
 import time
 
 import pybullet as p
@@ -9,6 +9,39 @@ from utils.collision_utils import get_collision_fn
 
 import utils.bullet_obj_utils as bullet_obj_utils
 import utils.plot_utils as plot_utils
+
+
+def get_env_config_demo() -> (
+    Tuple[np.ndarray, float, List[float], List[List[float]], List[List[float]]]
+):
+    """
+    Return a env config for testing
+
+    Returns
+    -------
+    start_state, rail_length, goal_ee_pos, obstacle_positions, obstacle_dimensions
+    """
+    start_state = np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
+    rail_length = 3.0
+    goal_ee_pos = [0.162, -0.192, 0.906]
+
+    obstacle_positions = [
+        # [0.5, 0.0, 0.0],
+        [0.0, 0.5, 0.0],
+        [0.0, 0.0, 0.5],
+    ]
+    obstacle_dimensions = [
+        # [0.2, 0.1, 0.1],
+        [0.1, 0.3, 0.1],
+        [0.1, 0.1, 0.4],
+    ]
+    return (
+        start_state,
+        rail_length,
+        goal_ee_pos,
+        obstacle_positions,
+        obstacle_dimensions,
+    )
 
 
 def test_collision_check():
@@ -24,25 +57,19 @@ def test_collision_check():
 
     urdf_path = "urdf/ur5.urdf"
 
-    start_state = np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
+    # =============================== get env ===============================
+    # env config
+    start_state, rail_length, goal_ee_pos, obstacle_positions, obstacle_dimensions = (
+        get_env_config_demo()
+    )
 
-    start_ee_pos = [-0.343, -0.191, 0.847]
-    goal_ee_pos = [0.162, -0.192, 0.906]
+    start_ee_pos = [-0.343, -0.191, 0.847]  # for plotting
 
+    # plot env
     plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
+    plot_utils.plot_rail(rail_length=rail_length)
 
-    obstacle_positions = [
-        # [0.5, 0.0, 0.0],
-        [0.0, 0.5, 0.0],
-        [0.0, 0.0, 0.5],
-    ]
-
-    obstacle_dimensions = [
-        # [0.2, 0.1, 0.1],
-        [0.1, 0.3, 0.1],
-        [0.1, 0.1, 0.4],
-    ]
-
+    # =============================== spawn objects ===============================
     # spawn plane
     plane_uid = p.loadURDF("plane.urdf")
 
@@ -56,6 +83,10 @@ def test_collision_check():
     )
     obstacle_uids = [plane_uid] + spawned_obstacle_uids
 
+    # =============================== get collision checker ===============================
+
+    is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacle_uids)
+
     # joint_states = [
     #     # [3.14, 0.0, 0.0, 0.0, 0.0, 0.0],
     #     # [3.14, -np.pi * 0.125, 0.0, 0.0, 0.0, 0.0],
@@ -63,8 +94,6 @@ def test_collision_check():
     #     [3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0],
     #     [3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0],
     # ]
-
-    is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacle_uids)
 
     # for joint_state in joint_states:
     #     print(is_collision(joint_state))
@@ -74,11 +103,15 @@ def test_collision_check():
     #     pass
     #     # p.stepSimulation()
 
+    # =============================== plan path ===============================
+
     rrt_path = [
         np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
         np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
         np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
     ]
+
+    # =============================== plot path ===============================
 
     plot_utils.plot_path_forever(
         rrt_path,
