@@ -44,16 +44,10 @@ def get_env_config_demo() -> (
     )
 
 
-def test_collision_check():
+def test_rrt_star():
+    # =============================== init sim ===============================
     p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
-    p.resetDebugVisualizerCamera(
-        cameraDistance=1.5,
-        cameraYaw=45,
-        cameraPitch=-130,
-        # cameraPitch=-45,
-        cameraTargetPosition=[0, 0, 0],
-    )
 
     urdf_path = "urdf/ur5.urdf"
 
@@ -64,10 +58,6 @@ def test_collision_check():
     )
 
     start_ee_pos = [-0.343, -0.191, 0.847]  # for plotting
-
-    # plot env
-    plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
-    plot_utils.plot_rail(rail_length=rail_length)
 
     # =============================== spawn objects ===============================
     # spawn plane
@@ -83,6 +73,20 @@ def test_collision_check():
     )
     obstacle_uids = [plane_uid] + spawned_obstacle_uids
 
+    # =============================== set and plot env ===============================
+    bullet_obj_utils.set_joint_positions(
+        robot_uid=robot_uid, joint_ids=non_fixed_joint_uids, joint_states=start_state
+    )
+    plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
+    plot_utils.plot_rail(rail_length=rail_length)
+
+    p.resetDebugVisualizerCamera(
+        cameraDistance=rail_length,
+        cameraYaw=0,
+        cameraPitch=-135,
+        # cameraPitch=-45,
+        cameraTargetPosition=[rail_length * 0.5, 0.0, 0.0],
+    )
     # =============================== get collision checker ===============================
 
     is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacle_uids)
@@ -113,13 +117,17 @@ def test_collision_check():
 
     # =============================== plot path ===============================
 
-    plot_utils.plot_path_forever(
-        rrt_path,
-        non_fixed_joint_uids,
-        robot_uid,
-        plot_end_effector_pos=True,
-    )
+    # plot_utils.plot_path_forever(
+    #     rrt_path,
+    #     non_fixed_joint_uids,
+    #     robot_uid,
+    #     plot_end_effector_pos=True,
+    # )
+
+    while p.isConnected():
+        pass
+        # p.stepSimulation()
 
 
 if __name__ == "__main__":
-    test_collision_check()
+    test_rrt_star()
