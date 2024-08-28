@@ -9,14 +9,19 @@ from utils.collision_utils import get_collision_fn
 
 import utils.bullet_obj_utils as bullet_obj_utils
 import utils.plot_utils as plot_utils
+from utils.types import RobotState
 
 
-def get_env_config_demo() -> (
-    Tuple[np.ndarray, float, List[float], List[List[float]], List[List[float]]]
-):
+def get_env_config_demo() -> Tuple[
+    RobotState,
+    RobotState,
+    float,
+    List[Tuple[float, float, float]],
+    List[Tuple[float, float, float]],
+]:
     """
     Return a env config for testing.
-    In rail env, 2d_x in [0, rail_length], 2d_y = 0, 2d_yaw = 0.
+    In rail env, 2d_x in [0, rail_length], 2d_y = 0, 2d_yaw = 0 for robot state.
 
     Returns
     -------
@@ -24,8 +29,8 @@ def get_env_config_demo() -> (
 
     state: np.ndarray (2d_x, 2d_y, 2d_yaw, joint_0, joint_1, joint_2, joint_3, joint_4, joint_5)
     """
-    start_state = np.array([0.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
-    goal_state = np.array([3.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
+    start_state = (0.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
+    goal_state = (3.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
     rail_length = 3.0
     # goal_ee_pos = [0.162, -0.192, 0.906]
 
