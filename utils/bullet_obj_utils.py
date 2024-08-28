@@ -5,6 +5,23 @@ import pybullet as p
 from utils.types import RobotState
 
 
+def get_base_pose_and_joint_state_from_robot_state(
+    robot_state: RobotState,
+) -> Tuple[Tuple[float, float, float], Tuple[float, float, float, float], List[float]]:
+    """
+    Separate the base position, base orientation and joint states from the robot state of ur5 on rail.
+
+    Returns
+    -------
+    base_pose, base_orientation, joint_states
+    """
+    # robot base moves on 1d rail.
+    base_position = (robot_state[0], 0.0, 0.0)
+    base_orientation = (0, 0, 0, 1)
+    joint_states = robot_state[1:]
+    return base_position, base_orientation, joint_states
+
+
 def print_joint_positions(robot_uid):
     num_joints = p.getNumJoints(robot_uid)
 
@@ -32,13 +49,12 @@ def set_joint_positions(
 def set_base_and_joint_positions(
     robot_uid: int, joint_ids: List[int], robot_state: RobotState
 ):
-    base_pose = robot_state[:3]
-    joint_states = robot_state[3:]
+    base_position, base_orientation, joint_states = (
+        get_base_pose_and_joint_state_from_robot_state(robot_state)
+    )
     # base_orientation = p.getQuaternionFromEuler([0, 0, base_pose[2]])
     p.resetBasePositionAndOrientation(
-        bodyUniqueId=robot_uid,
-        posObj=base_pose,
-        ornObj=[0, 0, 0, 1],  # base_orientation
+        bodyUniqueId=robot_uid, posObj=base_position, ornObj=base_orientation
     )
     set_joint_positions(
         robot_uid=robot_uid, joint_ids=joint_ids, joint_states=joint_states

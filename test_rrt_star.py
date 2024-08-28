@@ -29,8 +29,8 @@ def get_env_config_demo() -> Tuple[
 
     state: np.ndarray (2d_x, 2d_y, 2d_yaw, joint_0, joint_1, joint_2, joint_3, joint_4, joint_5)
     """
-    start_state = (0.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
-    goal_state = (3.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
+    start_state = (0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
+    goal_state = (3.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
     rail_length = 3.0
     # goal_ee_pos = [0.162, -0.192, 0.906]
 
@@ -65,12 +65,6 @@ def test_rrt_star():
     start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions = (
         get_env_config_demo()
     )
-
-    start_base_pose = start_state[0:3]
-    start_joint_state = start_state[3:]
-
-    goal_rail_pos = goal_state[0:3]
-    goal_joint_state = goal_state[3:]
 
     # =============================== spawn objects ===============================
     # spawn plane
@@ -129,12 +123,6 @@ def test_rrt_star():
     #     # p.stepSimulation()
 
     # =============================== plan path ===============================
-
-    # rrt_path = [
-    #     np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
-    #     np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
-    #     np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
-    # ]
 
     rrt_path = [
         start_state,
