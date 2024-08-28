@@ -27,6 +27,22 @@ def set_joint_positions(
         p.resetJointState(robot_uid, joint_id, joint_values)
 
 
+def set_base_and_joint_positions(
+    robot_uid: int, joint_ids: List[int], robot_state: List[float]
+):
+    base_pose = robot_state[:3]
+    joint_states = robot_state[3:]
+    # base_orientation = p.getQuaternionFromEuler([0, 0, base_pose[2]])
+    p.resetBasePositionAndOrientation(
+        bodyUniqueId=robot_uid,
+        posObj=base_pose,
+        ornObj=[0, 0, 0, 1],  # base_orientation
+    )
+    set_joint_positions(
+        robot_uid=robot_uid, joint_ids=joint_ids, joint_states=joint_states
+    )
+
+
 def get_non_fixed_joints(robot_uid):
     num_joints = p.getNumJoints(robot_uid)
     non_fixed_joints = []
@@ -42,7 +58,7 @@ def spawn_robot(urdf_path):
     robot_uid = p.loadURDF(
         urdf_path,
         basePosition=[0.0, 0.0, 1e-2],  # Slightly above the ground
-        useFixedBase=True,
+        useFixedBase=False,
     )
     return robot_uid
 

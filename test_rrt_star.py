@@ -15,15 +15,19 @@ def get_env_config_demo() -> (
     Tuple[np.ndarray, float, List[float], List[List[float]], List[List[float]]]
 ):
     """
-    Return a env config for testing
+    Return a env config for testing.
+    In rail env, 2d_x in [0, rail_length], 2d_y = 0, 2d_yaw = 0.
 
     Returns
     -------
-    start_state, rail_length, goal_ee_pos, obstacle_positions, obstacle_dimensions
+    start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions
+
+    state: np.ndarray (2d_x, 2d_y, 2d_yaw, joint_0, joint_1, joint_2, joint_3, joint_4, joint_5)
     """
-    start_state = np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
+    start_state = np.array([0.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
+    goal_state = np.array([3.0, 0.0, 0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0])
     rail_length = 3.0
-    goal_ee_pos = [0.162, -0.192, 0.906]
+    # goal_ee_pos = [0.162, -0.192, 0.906]
 
     obstacle_positions = [
         # [0.5, 0.0, 0.0],
@@ -37,8 +41,8 @@ def get_env_config_demo() -> (
     ]
     return (
         start_state,
+        goal_state,
         rail_length,
-        goal_ee_pos,
         obstacle_positions,
         obstacle_dimensions,
     )
@@ -53,11 +57,15 @@ def test_rrt_star():
 
     # =============================== get env ===============================
     # env config
-    start_state, rail_length, goal_ee_pos, obstacle_positions, obstacle_dimensions = (
+    start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions = (
         get_env_config_demo()
     )
 
-    start_ee_pos = [-0.343, -0.191, 0.847]  # for plotting
+    start_base_pose = start_state[0:3]
+    start_joint_state = start_state[3:]
+
+    goal_rail_pos = goal_state[0:3]
+    goal_joint_state = goal_state[3:]
 
     # =============================== spawn objects ===============================
     # spawn plane
@@ -72,13 +80,21 @@ def test_rrt_star():
         obstacle_positions, obstacle_dimensions
     )
     obstacle_uids = [plane_uid] + spawned_obstacle_uids
+    plot_utils.plot_rail(rail_length=rail_length)
 
     # =============================== set and plot env ===============================
-    bullet_obj_utils.set_joint_positions(
-        robot_uid=robot_uid, joint_ids=non_fixed_joint_uids, joint_states=start_state
+
+    bullet_obj_utils.set_base_and_joint_positions(
+        robot_uid=robot_uid, joint_ids=non_fixed_joint_uids, robot_state=goal_state
     )
+    goal_ee_pos = bullet_obj_utils.get_end_effector_position(robot_uid)
+
+    bullet_obj_utils.set_base_and_joint_positions(
+        robot_uid=robot_uid, joint_ids=non_fixed_joint_uids, robot_state=start_state
+    )
+    start_ee_pos = bullet_obj_utils.get_end_effector_position(robot_uid)
+
     plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
-    plot_utils.plot_rail(rail_length=rail_length)
 
     p.resetDebugVisualizerCamera(
         cameraDistance=rail_length,
@@ -109,20 +125,25 @@ def test_rrt_star():
 
     # =============================== plan path ===============================
 
+    # rrt_path = [
+    #     np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
+    #     np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
+    #     np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
+    # ]
+
     rrt_path = [
-        np.array([3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0]),
-        np.array([3.14, -np.pi * 0.5, 0.0, 0.0, 0.0, 0.0]),
-        np.array([3.14, -np.pi * 0.6, 0.0, 0.0, 0.0, 0.0]),
+        start_state,
+        goal_state,
     ]
 
     # =============================== plot path ===============================
 
-    # plot_utils.plot_path_forever(
-    #     rrt_path,
-    #     non_fixed_joint_uids,
-    #     robot_uid,
-    #     plot_end_effector_pos=True,
-    # )
+    plot_utils.plot_path_forever(
+        path=rrt_path,
+        joint_uids=non_fixed_joint_uids,
+        robot_uid=robot_uid,
+        plot_end_effector_poses=True,
+    )
 
     while p.isConnected():
         pass

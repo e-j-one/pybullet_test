@@ -67,15 +67,21 @@ def plot_path_forever(
     joint_uids: List[int],
     robot_uid: int,
     hold_time: float = 0.2,
-    plot_end_effector_pos: bool = True,
+    plot_end_effector_poses: bool = True,
     marker_radius=0.01,
     marker_color=[0, 0, 1, 0.5],
 ):
+    """
+    Parameters
+    ----------
+    path : List[List[float]]
+        List of robot states on the path
+    """
     while True:
-        if plot_end_effector_pos:
+        if plot_end_effector_poses:
             for state_on_path in path:
-                bullet_obj_utils.set_joint_positions(
-                    robot_uid, joint_uids, state_on_path
+                bullet_obj_utils.set_base_and_joint_positions(
+                    robot_uid=robot_uid, joint_ids=joint_uids, robot_state=state_on_path
                 )
                 curr_end_effectgor_pos = bullet_obj_utils.get_end_effector_position(
                     robot_uid
@@ -89,8 +95,10 @@ def plot_path_forever(
                     baseCollisionShapeIndex=-1,
                     baseVisualShapeIndex=vs_id,
                 )
-            plot_end_effector_pos = False
+            plot_end_effector_poses = False
 
         for state_on_path in path:
-            bullet_obj_utils.set_joint_positions(robot_uid, joint_uids, state_on_path)
+            bullet_obj_utils.set_base_and_joint_positions(
+                robot_uid=robot_uid, joint_ids=joint_uids, robot_state=state_on_path
+            )
             time.sleep(hold_time)
