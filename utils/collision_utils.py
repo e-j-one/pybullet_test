@@ -1,5 +1,5 @@
 from itertools import product
-from typing import List
+from typing import List, Tuple
 
 import pybullet as p
 
@@ -17,28 +17,28 @@ def is_joint_state_in_limits(robot_uid: int, joint_states: List[float]) -> bool:
     return True
 
 
-def is_link_in_collision(robot_uid, link1, link2, max_distance=0.0):
+def is_link_in_collision(robot_uid: int, link_a: int, link_b: int, max_distance=0.0):
     return (
         len(
             p.getClosestPoints(
                 bodyA=robot_uid,
                 bodyB=robot_uid,
                 distance=max_distance,
-                linkIndexA=link1,
-                linkIndexB=link2,
+                linkIndexA=link_a,
+                linkIndexB=link_b,
             )
         )
         != 0
     )
 
 
-def is_body_in_collision(body_a, body_b, max_distance=0.0):
+def is_body_in_collision(body_a: int, body_b: int, max_distance: float = 0.0) -> bool:
     return (
         len(p.getClosestPoints(bodyA=body_a, bodyB=body_b, distance=max_distance)) != 0
     )
 
 
-def get_non_adjacent_pairs(robot_uid):
+def get_non_adjacent_pairs(robot_uid: int) -> List[Tuple[int, int]]:
     """
     Joint is assumed to be adjacent if the
     """
@@ -50,9 +50,9 @@ def get_non_adjacent_pairs(robot_uid):
 
 
 def get_collision_fn(
-    robot_uid,
-    joint_ids,
-    obstacles,
+    robot_uid: int,
+    joint_ids: List[int],
+    obstacles: List[int],
 ):
     non_adjacent_pairs = get_non_adjacent_pairs(robot_uid)
 

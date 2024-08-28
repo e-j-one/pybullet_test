@@ -4,11 +4,12 @@ import time
 import pybullet as p
 
 import utils.bullet_obj_utils as bullet_obj_utils
+from utils.types import RobotState
 
 
 def plot_start_and_goal_pos(
-    start_ee_pos: List[float],
-    goal_ee_pos: List[float],
+    start_ee_pos: Tuple[float, float, float],
+    goal_ee_pos: Tuple[float, float, float],
     start_pos_color=[0, 1, 0, 1],
     goal_pos_color=[1, 0, 0, 1],
     text_size=2.5,
@@ -63,7 +64,7 @@ def plot_rail(
 
 
 def plot_path_forever(
-    path: List[List[float]],
+    path: List[RobotState],
     joint_uids: List[int],
     robot_uid: int,
     hold_time: float = 0.2,
@@ -74,8 +75,7 @@ def plot_path_forever(
     """
     Parameters
     ----------
-    path : List[List[float]]
-        List of robot states on the path
+    path : List[RobotState]
     """
     while True:
         if plot_end_effector_poses:

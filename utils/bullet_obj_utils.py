@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Tuple
 
 import pybullet as p
+
+from utils.types import RobotState
 
 
 def print_joint_positions(robot_uid):
@@ -28,7 +30,7 @@ def set_joint_positions(
 
 
 def set_base_and_joint_positions(
-    robot_uid: int, joint_ids: List[int], robot_state: List[float]
+    robot_uid: int, joint_ids: List[int], robot_state: RobotState
 ):
     base_pose = robot_state[:3]
     joint_states = robot_state[3:]
@@ -43,7 +45,7 @@ def set_base_and_joint_positions(
     )
 
 
-def get_non_fixed_joints(robot_uid):
+def get_non_fixed_joints(robot_uid: int) -> List[int]:
     num_joints = p.getNumJoints(robot_uid)
     non_fixed_joints = []
     for i in range(num_joints):
@@ -54,7 +56,7 @@ def get_non_fixed_joints(robot_uid):
     return non_fixed_joints
 
 
-def spawn_robot(urdf_path):
+def spawn_robot(urdf_path) -> int:
     robot_uid = p.loadURDF(
         urdf_path,
         basePosition=[0.0, 0.0, 1e-2],  # Slightly above the ground
@@ -84,7 +86,7 @@ def spawn_obstacles(obstacle_positions, obstacle_dimensions) -> List[int]:
     return obstacle_ids
 
 
-def get_end_effector_position(robot_uid):
+def get_end_effector_position(robot_uid: int) -> Tuple[float, float, float]:
     # Get the state of the end-effector link (ee_link)
     end_effector_state = p.getLinkState(
         bodyUniqueId=robot_uid,
