@@ -8,8 +8,9 @@ from utils.types import RobotState
 
 
 class PathPlanner:
-    def __init__(self, config):
-        pass
+    def __init__(self, max_iter: int, robot_state_ranges: List[Tuple[float, float]]):
+        self.max_iter = max_iter
+        self.robot_state_ranges = robot_state_ranges
 
     def set_env(
         self,
