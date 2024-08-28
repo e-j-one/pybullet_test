@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from algorithms.path_planner import PathPlanner
+from utils.types import RobotState
+from utils.rrt_trees import RrtTree
 
 # from planners.utils.line_algorithm import line_algorithm
 # from planners.trees.rrt_trees import RrtTree
@@ -13,10 +15,39 @@ class RrtPlanner(PathPlanner):
     def __init__(self, config):
         super().__init__(config)
 
-    def plan_path(self) -> List[List[float]]:
+    def set_env(
+        self,
+        start_state: RobotState,
+        goal_state: RobotState,
+        obstacle_positions: List[Tuple[float, float, float]],
+        obstacle_dimensions: List[Tuple[float, float, float]],
+    ):
+        super().set_env(
+            start_state, goal_state, obstacle_positions, obstacle_dimensions
+        )
+
+    def plan_path(self) -> List[RobotState]:
         """
         Plan a path from start to goal using RRT algorithm
+
+        1. Initialize tree
+        2. Sample random point
+        3. Find nearest node in the tree
+        4. Drive from nearest node to random point
+        5. Check collision
+            If collision, go to 2
+        6. Add new node to the tree
+        7. Repeat 2-6 until goal is reached or max_iter is reached
         """
+
+        self._initialize_tree()
+
+        for sample_iter in range(self.max_iter):
+            pass
+
+        path = None
+
+        return path, sample_iter
 
         # Initialize the tree with the start node
         self.tree.reset_tree()
@@ -61,3 +92,6 @@ class RrtPlanner(PathPlanner):
         else:
             print("Path not found")
             return None, sample_iter
+
+    def _initialize_tree(self):
+        self.tree = RrtTree()
