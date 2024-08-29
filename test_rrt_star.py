@@ -41,11 +41,15 @@ def get_env_config_demo() -> Tuple[
         # [0.5, 0.0, 0.0],
         [0.0, 0.5, 0.0],
         [0.0, 0.0, 0.5],
+        # [1.5, 0.0, 0.5],
+        [1.5, -1.5, 0.9],
     ]
     obstacle_dimensions = [
         # [0.2, 0.1, 0.1],
         [0.1, 0.3, 0.1],
         [0.1, 0.1, 0.4],
+        # [0.1, 0.1, 0.4],
+        [0.1, 3.0, 0.4],
     ]
     return (
         start_state,
@@ -58,9 +62,11 @@ def get_env_config_demo() -> Tuple[
 
 def test_rrt_star():
     planner_config = {
-        "max_iter": 2000,
-        "drive_dist": 0.314,
+        "max_iter": 16000,
         "collision_check_step_size": 0.04,
+        "goal_reached_threshold": 0.04,
+        # rrt
+        "drive_dist": 0.314,
         "goal_sample_rate": 0.05,
     }
     # =============================== init sim ===============================
@@ -107,7 +113,7 @@ def test_rrt_star():
     p.resetDebugVisualizerCamera(
         cameraDistance=rail_length,
         cameraYaw=0,
-        cameraPitch=-135,
+        cameraPitch=-150,
         # cameraPitch=-45,
         cameraTargetPosition=[rail_length * 0.5, 0.0, 0.0],
     )
@@ -141,15 +147,16 @@ def test_rrt_star():
     robot_state_ranges = bullet_obj_utils.get_robot_state_ranges(
         robot_uid=robot_uid, joint_ids=non_fixed_joint_ids, rail_length=rail_length
     )
-    print("robot_state_ranges: ", robot_state_ranges)
+    # print("robot_state_ranges: ", robot_state_ranges)
 
     # rrt
     rrt_planner = RrtPlanner(
         max_iter=planner_config["max_iter"],
         joint_ids=non_fixed_joint_ids,
         robot_state_ranges=robot_state_ranges,
-        drive_dist=planner_config["drive_dist"],
         collision_check_step_size=planner_config["collision_check_step_size"],
+        goal_reached_threshold=planner_config["goal_reached_threshold"],
+        drive_dist=planner_config["drive_dist"],
         goal_sample_rate=planner_config["goal_sample_rate"],
     )
     rrt_planner.set_env(
@@ -162,7 +169,7 @@ def test_rrt_star():
     )
     rrt_path, num_samples = rrt_planner.plan_path()
 
-    print("rrt_path: ", rrt_path)
+    # print("rrt_path: ", rrt_path)
     print("n sample: ", num_samples)
 
     # rrt_path = [

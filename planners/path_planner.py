@@ -15,11 +15,13 @@ class PathPlanner:
         joint_ids: List[int],
         robot_state_ranges: List[Tuple[float, float]],
         collision_check_step_size: float,
+        goal_reached_threshold: float,
     ):
         self.max_iter = max_iter
         self.joint_ids = joint_ids
         self.robot_state_ranges = robot_state_ranges
         self.collision_check_step_size = collision_check_step_size
+        self.goal_reached_threshold = goal_reached_threshold
 
     def set_env(
         self,

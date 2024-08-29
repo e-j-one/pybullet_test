@@ -10,6 +10,9 @@ import planners.utils.geometry_utils as GeometryUtils
 from utils.types import RobotState
 import utils.plot_utils as PlotUtils
 
+import pdb
+
+
 # from planners.utils.line_algorithm import line_algorithm
 # from planners.trees.rrt_trees import RrtTree
 
@@ -20,8 +23,9 @@ class RrtPlanner(PathPlanner):
         max_iter: int,
         joint_ids: List[int],
         robot_state_ranges: List[Tuple[float, float]],
-        drive_dist: float,
         collision_check_step_size: float,
+        goal_reached_threshold: float,
+        drive_dist: float,
         goal_sample_rate: float,
     ):
         """
@@ -43,6 +47,7 @@ class RrtPlanner(PathPlanner):
             joint_ids=joint_ids,
             robot_state_ranges=robot_state_ranges,
             collision_check_step_size=collision_check_step_size,
+            goal_reached_threshold=goal_reached_threshold,
         )
         self.drive_dist = drive_dist
         self.goal_sample_rate = goal_sample_rate
@@ -117,6 +122,11 @@ class RrtPlanner(PathPlanner):
         return self.tree.add_node(robot_state=robot_state, parent_idx=parent_idx)
 
     def _is_goal_reached(self, robot_state: RobotState) -> bool:
+        if (
+            np.linalg.norm(np.array(robot_state) - np.array(self.goal_state))
+            < self.goal_reached_threshold
+        ):
+            return True
         return False
 
     def _add_goal_state_if_not_in_tree(self, parent_node_idx):
@@ -170,6 +180,14 @@ class RrtPlanner(PathPlanner):
                 robot_state_i=nearest_node_robot_state,
                 robot_state_j=new_robot_state,
             )
+
+            print("random : ", [f"{x:.2f}" for x in random_robot_state])
+            print("nearest: ", [f"{x:.2f}" for x in nearest_node_robot_state])
+            print("new    : ", [f"{x:.2f}" for x in new_robot_state])
+
+            # pdb.set_trace()
+            input("Press Enter to continue...")
+
             new_node_idx = self._add_node_to_tree(
                 robot_state=new_robot_state, parent_idx=nearest_node_idx
             )
