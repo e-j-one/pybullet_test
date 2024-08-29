@@ -22,17 +22,29 @@ def get_base_pose_and_joint_state_from_robot_state(
     return base_position, base_orientation, joint_states
 
 
-def print_joint_positions(robot_uid):
+def get_non_fixed_joints(robot_uid: int) -> List[int]:
     num_joints = p.getNumJoints(robot_uid)
-
-    print("Joint positions for robot UID:", robot_uid)
+    non_fixed_joints = []
     for i in range(num_joints):
         joint_info = p.getJointInfo(robot_uid, i)
-        # print("joint_info[8]:", joint_info[8])
-        # print("joint_info[9]:", joint_info[9])
-        joint_name = joint_info[1].decode("utf-8")
-        joint_position = p.getJointState(robot_uid, i)[0]
-        print(f"Joint {i}: {joint_name}, \tPosition: {joint_position:.3f}")
+        joint_type = joint_info[2]
+        if joint_type != p.JOINT_FIXED:
+            non_fixed_joints.append(i)
+    return non_fixed_joints
+
+
+def get_end_effector_position(robot_uid: int) -> Tuple[float, float, float]:
+    # Get the state of the end-effector link (ee_link)
+    end_effector_state = p.getLinkState(
+        bodyUniqueId=robot_uid,
+        linkIndex=6,  # The index of the end-effector link (usually the last link)
+        computeForwardKinematics=True,
+    )
+
+    # The position of the end-effector is the first element of the link state
+    end_effector_position = end_effector_state[4]
+
+    return end_effector_position
 
 
 def set_joint_positions(
@@ -59,17 +71,6 @@ def set_base_and_joint_positions(
     set_joint_positions(
         robot_uid=robot_uid, joint_ids=joint_ids, joint_states=joint_states
     )
-
-
-def get_non_fixed_joints(robot_uid: int) -> List[int]:
-    num_joints = p.getNumJoints(robot_uid)
-    non_fixed_joints = []
-    for i in range(num_joints):
-        joint_info = p.getJointInfo(robot_uid, i)
-        joint_type = joint_info[2]
-        if joint_type != p.JOINT_FIXED:
-            non_fixed_joints.append(i)
-    return non_fixed_joints
 
 
 def spawn_robot(urdf_path) -> int:
@@ -102,15 +103,14 @@ def spawn_obstacles(obstacle_positions, obstacle_dimensions) -> List[int]:
     return obstacle_ids
 
 
-def get_end_effector_position(robot_uid: int) -> Tuple[float, float, float]:
-    # Get the state of the end-effector link (ee_link)
-    end_effector_state = p.getLinkState(
-        bodyUniqueId=robot_uid,
-        linkIndex=6,  # The index of the end-effector link (usually the last link)
-        computeForwardKinematics=True,
-    )
+def print_joint_positions(robot_uid):
+    num_joints = p.getNumJoints(robot_uid)
 
-    # The position of the end-effector is the first element of the link state
-    end_effector_position = end_effector_state[4]
-
-    return end_effector_position
+    print("Joint positions for robot UID:", robot_uid)
+    for i in range(num_joints):
+        joint_info = p.getJointInfo(robot_uid, i)
+        # print("joint_info[8]:", joint_info[8])
+        # print("joint_info[9]:", joint_info[9])
+        joint_name = joint_info[1].decode("utf-8")
+        joint_position = p.getJointState(robot_uid, i)[0]
+        print(f"Joint {i}: {joint_name}, \tPosition: {joint_position:.3f}")
