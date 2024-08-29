@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial import KDTree
 
 from utils.types import RobotState
-from algorithms.utils.rrt_nodes import RrtNode, RrtStarNode
+from planners.utils.rrt_nodes import RrtNode, RrtStarNode
 
 
 class RrtTree:
