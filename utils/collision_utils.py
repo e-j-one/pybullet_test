@@ -56,18 +56,19 @@ def get_collision_fn(
 ):
     non_adjacent_pairs = get_non_adjacent_pairs(robot_uid)
 
-    print("non_adjacent_pairs:", non_adjacent_pairs)
+    # print("non_adjacent_pairs:", non_adjacent_pairs)
 
     robot_body_uids = [robot_uid]
     check_body_uid_pairs = list(product(robot_body_uids, obstacles))
 
-    print("============================================")
-    print("========== non_adjacent_pairs:", non_adjacent_pairs)
-    print("========== check_body_uid_pairs:", check_body_uid_pairs)
+    # print("============================================")
+    # print("========== non_adjacent_pairs:", non_adjacent_pairs)
+    # print("========== check_body_uid_pairs:", check_body_uid_pairs)
+    # print("============================================")
 
     def is_collision_fn(q):
         if not is_joint_state_in_limits(robot_uid, q):
-            print("Joint state is out of limits")
+            # print("Joint state is out of limits")
             return True
 
         bullet_obj_utils.set_joint_positions(robot_uid, joint_ids, q)

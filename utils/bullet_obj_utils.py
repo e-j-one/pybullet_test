@@ -47,6 +47,26 @@ def get_end_effector_position(robot_uid: int) -> Tuple[float, float, float]:
     return end_effector_position
 
 
+def get_joint_limits(robot_uid: int, joint_ids: List[int]) -> List[Tuple[float, float]]:
+    joint_limits = []
+    for joint_id in joint_ids:
+        joint_info = p.getJointInfo(robot_uid, joint_id)
+        lower_limit = joint_info[8]
+        upper_limit = joint_info[9]
+        # print(f"Joint {joint_id}: Lower limit: {lower_limit}, Upper limit: {upper_limit}")
+        joint_limits.append((lower_limit, upper_limit))
+    return joint_limits
+
+
+def get_robot_state_ranges(
+    robot_uid: int, joint_ids: List[int], rail_length: int
+) -> List[Tuple[float, float]]:
+    robot_state_ranges = [(0, rail_length)]
+    joint_limits = get_joint_limits(robot_uid, joint_ids)
+    robot_state_ranges += joint_limits
+    return robot_state_ranges
+
+
 def set_joint_positions(
     robot_uid: int, joint_ids: List[int], joint_states: List[float]
 ):

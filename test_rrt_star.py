@@ -5,10 +5,10 @@ import time
 import pybullet as p
 import pybullet_data
 
-from utils.collision_utils import get_collision_fn
-
+from planners.rrt_planner import RrtPlanner
 import utils.bullet_obj_utils as bullet_obj_utils
 import utils.plot_utils as plot_utils
+from utils.collision_utils import get_collision_fn
 from utils.types import RobotState
 
 
@@ -123,6 +123,24 @@ def test_rrt_star():
     #     # p.stepSimulation()
 
     # =============================== plan path ===============================
+
+    robot_state_ranges = bullet_obj_utils.get_robot_state_ranges(
+        robot_uid=robot_uid, joint_ids=non_fixed_joint_uids, rail_length=rail_length
+    )
+    print("robot_state_ranges: ", robot_state_ranges)
+
+    # rrt
+    max_iter = 1000
+    rrt_planner = RrtPlanner(max_iter=max_iter, robot_state_ranges=robot_state_ranges)
+    rrt_planner.set_env(
+        start_state=start_state,
+        goal_state=goal_state,
+        obstacle_positions=obstacle_positions,
+        obstacle_dimensions=obstacle_dimensions,
+    )
+    rrt_path = rrt_planner.plan_path()
+
+    print("rrt_path: ", rrt_path)
 
     # rrt_path = [
     #     start_state,

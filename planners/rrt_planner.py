@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from planners.path_planner import PathPlanner
+from planners.utils.rrt_trees import RrtTree
 from utils.types import RobotState
-from utils.rrt_trees import RrtTree
 
 # from planners.utils.line_algorithm import line_algorithm
 # from planners.trees.rrt_trees import RrtTree
@@ -27,7 +27,12 @@ class RrtPlanner(PathPlanner):
         )
 
     def _initialize_tree(self):
+        """
+        Reset the tree to start a new planning
+        Reset tree and add the start state to the tree
+        """
         self.tree = RrtTree()
+        self.tree.add_root(self.start_state)
 
     def _sample_robot_state(self) -> RobotState:
         """
