@@ -11,6 +11,9 @@ import utils.plot_utils as plot_utils
 from utils.collision_utils import get_collision_fn
 from utils.types import RobotState
 
+SEED = 0
+np.random.seed(SEED)
+
 
 def get_env_config_demo() -> Tuple[
     RobotState,
@@ -54,6 +57,12 @@ def get_env_config_demo() -> Tuple[
 
 
 def test_rrt_star():
+    planner_config = {
+        "max_iter": 2000,
+        # "drive_dist": 0.314,
+        "drive_dist": 3.14,
+        "collision_check_step_size": 0.04,
+    }
     # =============================== init sim ===============================
     p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -130,8 +139,12 @@ def test_rrt_star():
     print("robot_state_ranges: ", robot_state_ranges)
 
     # rrt
-    max_iter = 1000
-    rrt_planner = RrtPlanner(max_iter=max_iter, robot_state_ranges=robot_state_ranges)
+    rrt_planner = RrtPlanner(
+        max_iter=planner_config["max_iter"],
+        robot_state_ranges=robot_state_ranges,
+        drive_dist=planner_config["drive_dist"],
+        collision_check_step_size=planner_config["collision_check_step_size"],
+    )
     rrt_planner.set_env(
         start_state=start_state,
         goal_state=goal_state,

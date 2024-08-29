@@ -12,8 +12,28 @@ from utils.types import RobotState
 
 
 class RrtPlanner(PathPlanner):
-    def __init__(self, max_iter: int, robot_state_ranges: List[Tuple[float, float]]):
+    def __init__(
+        self,
+        max_iter: int,
+        robot_state_ranges: List[Tuple[float, float]],
+        drive_dist: float,
+        collision_check_step_size: float,
+    ):
+        """
+        Parameters
+        ----------
+        max_iter: int
+            Maximum number of iterations to run the algorithm
+        robot_state_ranges: List[Tuple[float, float]]
+            List of tuples of (min, max) values for each dimension of the robot state
+        drive_dist: float
+            Distance to drive from the nearest node to the sampled node
+        collision_check_step_size: float
+            Step size to check for collision between states
+        """
         super().__init__(max_iter=max_iter, robot_state_ranges=robot_state_ranges)
+        self.drive_dist = drive_dist
+        self.collision_check_step_size = collision_check_step_size
 
     def set_env(
         self,
@@ -53,7 +73,31 @@ class RrtPlanner(PathPlanner):
     def _drive(
         self, nearest_node_robot_state: RobotState, sampled_robot_state: RobotState
     ) -> RobotState:
-        raise NotImplementedError
+        """
+        Drive from nearest node to sampled node by a distance of self.drive_dist
+        """
+
+        nearest_node_robot_state_np = np.array(nearest_node_robot_state)
+        sampled_robot_state_np = np.array(sampled_robot_state)
+        diff = sampled_robot_state_np - nearest_node_robot_state_np
+
+        dist_to_sampled_state = np.linalg.norm(diff)
+
+        if dist_to_sampled_state < self.drive_dist:
+            return sampled_robot_state
+        if dist_to_sampled_state == 0:
+            return nearest_node_robot_state
+
+        drive_direction = diff / dist_to_sampled_state
+
+        new_robot_state = (
+            nearest_node_robot_state_np + self.drive_dist * drive_direction
+        )
+
+        # print("nearest node", nearest_node_robot_state)
+        # print("sampled node", sampled_robot_state)
+        # print("drived  node", tuple(new_robot_state))
+        return tuple(new_robot_state)
 
     def _is_state_already_in_tree(self, robot_state: RobotState) -> bool:
         return self.tree.check_if_robot_state_already_in_tree(robot_state)
@@ -61,6 +105,11 @@ class RrtPlanner(PathPlanner):
     def _is_collision_between_states(
         self, robot_state_i: RobotState, robot_state_j: RobotState
     ) -> bool:
+        """
+        Check if there is a collision between the states robot_state_i and robot_state_j
+        Progresively sample points between the two states and check for collision
+        """
+
         raise NotImplementedError
 
     def _is_goal_reached(new_robot_state):
