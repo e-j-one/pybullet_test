@@ -4,6 +4,7 @@ from typing import List, Tuple
 import pybullet as p
 
 import utils.bullet_obj_utils as bullet_obj_utils
+from utils.types import RobotState
 
 
 def is_joint_state_in_limits(robot_uid: int, joint_states: List[float]) -> bool:
@@ -49,10 +50,8 @@ def get_non_adjacent_pairs(robot_uid: int) -> List[Tuple[int, int]]:
     return non_adjacent_pairs
 
 
-def get_collision_fn(
-    robot_uid: int,
-    joint_ids: List[int],
-    obstacles: List[int],
+def get_check_collision_fn(
+    robot_uid: int, joint_ids: List[int], obstacles: List[int], rail_length: float
 ):
     non_adjacent_pairs = get_non_adjacent_pairs(robot_uid)
 
@@ -66,12 +65,22 @@ def get_collision_fn(
     # print("========== check_body_uid_pairs:", check_body_uid_pairs)
     # print("============================================")
 
-    def is_collision_fn(q):
-        if not is_joint_state_in_limits(robot_uid, q):
-            # print("Joint state is out of limits")
+    def is_collision_fn(robot_state: RobotState):
+        base_position, base_orientation, joint_states = (
+            bullet_obj_utils.get_base_pose_and_joint_state_from_robot_state(robot_state)
+        )
+
+        if base_position[0] < 0 or base_position[0] > rail_length:
+            # print("Robot is out of rail")
             return True
 
-        bullet_obj_utils.set_joint_positions(robot_uid, joint_ids, q)
+        if not is_joint_state_in_limits(robot_uid=robot_uid, joint_states=joint_states):
+            print("Joint state is out of limits")
+            return True
+
+        bullet_obj_utils.set_base_and_joint_positions(
+            robot_uid=robot_uid, joint_ids=joint_ids, robot_state=robot_state
+        )
 
         for link1, link2 in non_adjacent_pairs:
             if is_link_in_collision(robot_uid, link1, link2):

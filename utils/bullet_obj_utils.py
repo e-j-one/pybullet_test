@@ -4,6 +4,8 @@ import pybullet as p
 
 from utils.types import RobotState
 
+ROBOT_BASE_Z_COORD = 1e-2
+
 
 def get_base_pose_and_joint_state_from_robot_state(
     robot_state: RobotState,
@@ -16,7 +18,7 @@ def get_base_pose_and_joint_state_from_robot_state(
     base_pose, base_orientation, joint_states
     """
     # robot base moves on 1d rail.
-    base_position = (robot_state[0], 0.0, 0.0)
+    base_position = (robot_state[0], 0.0, ROBOT_BASE_Z_COORD)
     base_orientation = (0, 0, 0, 1)
     joint_states = robot_state[1:]
     return base_position, base_orientation, joint_states
@@ -96,7 +98,7 @@ def set_base_and_joint_positions(
 def spawn_robot(urdf_path) -> int:
     robot_uid = p.loadURDF(
         urdf_path,
-        basePosition=[0.0, 0.0, 1e-2],  # Slightly above the ground
+        basePosition=[0.0, 0.0, ROBOT_BASE_Z_COORD],  # Slightly above the ground
         useFixedBase=False,
     )
     return robot_uid

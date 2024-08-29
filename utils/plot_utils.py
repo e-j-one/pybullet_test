@@ -48,6 +48,29 @@ def plot_start_and_goal_pos(
     )
 
 
+def plot_end_effector_line_between_robot_states(
+    robot_uid: int,
+    joint_ids: List[int],
+    robot_state_i: RobotState,
+    robot_state_j: RobotState,
+    line_color: Tuple[float, float, float] = [0, 0, 1],
+):
+    bullet_obj_utils.set_base_and_joint_positions(
+        robot_uid=robot_uid, joint_ids=joint_ids, robot_state=robot_state_i
+    )
+    ee_pos_i = bullet_obj_utils.get_end_effector_position(robot_uid)
+    bullet_obj_utils.set_base_and_joint_positions(
+        robot_uid=robot_uid, joint_ids=joint_ids, robot_state=robot_state_j
+    )
+    ee_pos_j = bullet_obj_utils.get_end_effector_position(robot_uid)
+    p.addUserDebugLine(
+        lineFromXYZ=ee_pos_i,
+        lineToXYZ=ee_pos_j,
+        lineColorRGB=line_color,
+        lineWidth=0.5,
+    )
+
+
 def plot_rail(
     rail_length: float = 3.0, rail_width: float = 0.2, rail_color=[0.8, 0.8, 0.8, 1.0]
 ) -> int:
@@ -65,7 +88,7 @@ def plot_rail(
 
 def plot_path_forever(
     path: List[RobotState],
-    joint_uids: List[int],
+    joint_ids: List[int],
     robot_uid: int,
     hold_time: float = 0.2,
     plot_end_effector_poses: bool = True,
@@ -81,7 +104,7 @@ def plot_path_forever(
         if plot_end_effector_poses:
             for state_on_path in path:
                 bullet_obj_utils.set_base_and_joint_positions(
-                    robot_uid=robot_uid, joint_ids=joint_uids, robot_state=state_on_path
+                    robot_uid=robot_uid, joint_ids=joint_ids, robot_state=state_on_path
                 )
                 curr_end_effectgor_pos = bullet_obj_utils.get_end_effector_position(
                     robot_uid
@@ -99,6 +122,6 @@ def plot_path_forever(
 
         for state_on_path in path:
             bullet_obj_utils.set_base_and_joint_positions(
-                robot_uid=robot_uid, joint_ids=joint_uids, robot_state=state_on_path
+                robot_uid=robot_uid, joint_ids=joint_ids, robot_state=state_on_path
             )
             time.sleep(hold_time)
