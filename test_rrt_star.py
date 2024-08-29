@@ -124,10 +124,10 @@ def test_rrt_star():
 
     # =============================== plan path ===============================
 
-    rrt_path = [
-        start_state,
-        goal_state,
-    ]
+    # rrt_path = [
+    #     start_state,
+    #     goal_state,
+    # ]
 
     # =============================== plot path ===============================
 

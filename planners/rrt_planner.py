@@ -3,7 +3,7 @@ from typing import Tuple, Optional, List
 import numpy as np
 import matplotlib.pyplot as plt
 
-from algorithms.path_planner import PathPlanner
+from planners.path_planner import PathPlanner
 from utils.types import RobotState
 from utils.rrt_trees import RrtTree
 
