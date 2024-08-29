@@ -110,8 +110,9 @@ class RrtPlanner(PathPlanner):
     def _add_node_to_tree(self, robot_state: RobotState, parent_idx: int) -> int:
         return self.tree.add_node(robot_state=robot_state, parent_idx=parent_idx)
 
-    def _is_goal_reached(new_robot_state):
-        raise NotImplementedError
+    def _is_goal_reached(self, robot_state: RobotState) -> bool:
+        print(" is goal reached new_robot_state: ", robot_state)
+        return False
 
     def _add_goal_state_if_not_in_tree(self, parent_node_idx):
         if not self.tree.check_if_robot_state_already_in_tree(self.goal_state):
@@ -168,7 +169,9 @@ class RrtPlanner(PathPlanner):
                 robot_state=new_robot_state, parent_idx=nearest_node_idx
             )
 
-            if self._is_goal_reached(new_robot_state):
+            print("==================== new_robot_state: ", new_robot_state)
+
+            if self._is_goal_reached(robot_state=new_robot_state):
                 self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
                 path_found = True
                 break

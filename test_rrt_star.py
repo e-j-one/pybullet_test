@@ -59,8 +59,8 @@ def get_env_config_demo() -> Tuple[
 def test_rrt_star():
     planner_config = {
         "max_iter": 2000,
-        # "drive_dist": 0.314,
-        "drive_dist": 3.14,
+        "drive_dist": 0.314,
+        # "drive_dist": 3.14,
         "collision_check_step_size": 0.04,
     }
     # =============================== init sim ===============================
