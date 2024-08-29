@@ -22,6 +22,7 @@ class RrtPlanner(PathPlanner):
         robot_state_ranges: List[Tuple[float, float]],
         drive_dist: float,
         collision_check_step_size: float,
+        goal_sample_rate: float,
     ):
         """
         Parameters
@@ -44,6 +45,7 @@ class RrtPlanner(PathPlanner):
             collision_check_step_size=collision_check_step_size,
         )
         self.drive_dist = drive_dist
+        self.goal_sample_rate = goal_sample_rate
 
     def set_env(
         self,
@@ -74,7 +76,11 @@ class RrtPlanner(PathPlanner):
     def _sample_robot_state(self) -> RobotState:
         """
         Sample a random robot state within the self.robot_state_ranges
+        For goal_sample_rate probability, return the goal state, else return a random state
         """
+
+        if np.random.uniform() < self.goal_sample_rate:
+            return self.goal_state
 
         sampled_robot_state = []
         for state_range in self.robot_state_ranges:
@@ -111,7 +117,6 @@ class RrtPlanner(PathPlanner):
         return self.tree.add_node(robot_state=robot_state, parent_idx=parent_idx)
 
     def _is_goal_reached(self, robot_state: RobotState) -> bool:
-        print(" is goal reached new_robot_state: ", robot_state)
         return False
 
     def _add_goal_state_if_not_in_tree(self, parent_node_idx):
@@ -169,15 +174,14 @@ class RrtPlanner(PathPlanner):
                 robot_state=new_robot_state, parent_idx=nearest_node_idx
             )
 
-            print("==================== new_robot_state: ", new_robot_state)
-
             if self._is_goal_reached(robot_state=new_robot_state):
+                print("==================== Goal reached ====================")
                 self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
                 path_found = True
                 break
 
         if not path_found:
-            print("Path not found")
+            print("-------------------- Path not found --------------------")
             return None, sample_iter
 
         return self._get_path_to_goal(), sample_iter

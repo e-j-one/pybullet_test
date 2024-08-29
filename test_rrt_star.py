@@ -60,8 +60,8 @@ def test_rrt_star():
     planner_config = {
         "max_iter": 2000,
         "drive_dist": 0.314,
-        # "drive_dist": 3.14,
         "collision_check_step_size": 0.04,
+        "goal_sample_rate": 0.05,
     }
     # =============================== init sim ===============================
     p.connect(p.GUI)
@@ -150,6 +150,7 @@ def test_rrt_star():
         robot_state_ranges=robot_state_ranges,
         drive_dist=planner_config["drive_dist"],
         collision_check_step_size=planner_config["collision_check_step_size"],
+        goal_sample_rate=planner_config["goal_sample_rate"],
     )
     rrt_planner.set_env(
         robot_uid=robot_uid,
