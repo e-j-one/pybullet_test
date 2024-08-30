@@ -53,6 +53,8 @@ class RrtStarPlanner(RrtPlanner):
         obstacle_positions: List[Tuple[float, float, float]],
         obstacle_dimensions: List[Tuple[float, float, float]],
         check_collision_fn: Callable[[RobotState], bool],
+        use_goal_reached_fn: bool = False,
+        check_goal_reached_fn=None,
     ):
         super().set_env(
             robot_uid,
@@ -63,6 +65,8 @@ class RrtStarPlanner(RrtPlanner):
             obstacle_positions,
             obstacle_dimensions,
             check_collision_fn,
+            use_goal_reached_fn=use_goal_reached_fn,
+            check_goal_reached_fn=check_goal_reached_fn,
         )
 
     def _initialize_tree(self):
@@ -286,9 +290,9 @@ class RrtStarPlanner(RrtPlanner):
                 cost_to_collision_free_near_nodes,
             )
 
-            self._plot_debugline_between_robot_states(
-                nearest_node_robot_state, new_robot_state
-            )
+            # self._plot_debugline_between_robot_states(
+            #     nearest_node_robot_state, new_robot_state
+            # )
 
             self._rewire_tree(
                 new_node_idx,
@@ -305,7 +309,10 @@ class RrtStarPlanner(RrtPlanner):
 
             if self._is_goal_reached(robot_state=new_robot_state):
                 print("==================== Goal reached ====================")
-                self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
+                if self.use_goal_reached_fn:
+                    self.goal_reached_node_idx = new_node_idx
+                else:
+                    self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
                 path_found = True
                 break
 

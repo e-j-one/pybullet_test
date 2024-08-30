@@ -74,15 +74,19 @@ class ArmOnRailDataGenerator:
     def sample_new_map_data(self) -> Tuple[
         RobotState,
         RobotState,
+        Tuple[float, float, float],
         float,
         List[Tuple[float, float, float]],
         List[Tuple[float, float, float]],
     ]:
         """
-        Sample a new map with start, goal, rail length, obstacles
         1. Sample start position until it is collision free.
         2. Sample goal position until it is collision free and cost > min_state_cost_threshold.
         3. Sample obstacles until collision free.
+
+        Returns
+        -------
+        start_state, goal_state, goal_end_effector_pos, rail_length, obstacle_positions, obstacle_dimensions
         """
 
         p.connect(p.GUI)
@@ -119,6 +123,11 @@ class ArmOnRailDataGenerator:
             num_tries += 1
 
         print("goal_state found after ", num_tries, " tries ", goal_state)
+        goal_end_effector_pos = (
+            bullet_obj_utils.get_end_effector_position_from_robot_state(
+                self.robot_uid, non_fixed_joint_ids, goal_state
+            )
+        )
 
         obstacle_positions = []
         obstacle_dimensions = []
@@ -176,6 +185,7 @@ class ArmOnRailDataGenerator:
         return (
             start_state,
             goal_state,
+            goal_end_effector_pos,
             self.rail_length,
             obstacle_positions,
             obstacle_dimensions,

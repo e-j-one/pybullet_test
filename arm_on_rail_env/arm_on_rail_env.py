@@ -7,6 +7,7 @@ import pybullet_data
 import utils.plot_utils as plot_utils
 import utils.bullet_obj_utils as bullet_obj_utils
 from utils.collision_utils import get_check_collision_fn
+from utils.goal_reached_utils import get_check_goal_reached_fn
 from utils.types import RobotState
 
 
@@ -75,11 +76,19 @@ class ArmOnRailEnv:
         goal_state: RobotState,
         obstacle_positions: List[Tuple[float, float, float]],
         obstacle_dimensions: List[Tuple[float, float, float]],
+        use_goal_reached_fn: bool = False,
     ):
         """
         Connect to the pybullet GUI and reset the environment with the given config.
         Spawn the robot, obstacles and set the start and goal states.
         Get collision checker function.
+
+        Parameters
+        ----------
+        use_goal_reached_fn: bool
+            If True, check if the goal state is reached using the check_goal_reached
+            function. It checks end effector position to check if the goal is reached.
+
         """
         # init sim env
         p.connect(p.GUI)
@@ -89,6 +98,7 @@ class ArmOnRailEnv:
         self.goal_state = goal_state
         self.obstacle_positions = obstacle_positions
         self.obstacle_dimensions = obstacle_dimensions
+        self.use_goal_reached_fn = use_goal_reached_fn
 
         # spawn plane, robot and obstacles
         self.plane_uid = p.loadURDF("plane.urdf")
@@ -120,6 +130,13 @@ class ArmOnRailEnv:
             obstacles=self.obstacle_uids,
             rail_length=rail_length,
         )
+
+        if self.use_goal_reached_fn:
+            self.check_goal_reached = get_check_goal_reached_fn(
+                robot_uid=self.robot_uid,
+                joint_ids=self.non_fixed_joint_ids,
+                goal_state=self.goal_state,
+            )
 
         self.mark_start_and_goal_ee_pos()
 
@@ -170,16 +187,30 @@ class ArmOnRailEnv:
         self.path_planner = path_planner
 
     def set_path_planner_env(self):
-        self.path_planner.set_env(
-            robot_uid=self.robot_uid,
-            joint_ids=self.non_fixed_joint_ids,
-            robot_state_ranges=self.robot_state_ranges,
-            start_state=self.start_state,
-            goal_state=self.goal_state,
-            obstacle_positions=self.obstacle_positions,
-            obstacle_dimensions=self.obstacle_dimensions,
-            check_collision_fn=self.check_collision,
-        )
+        if self.use_goal_reached_fn:
+            self.path_planner.set_env(
+                robot_uid=self.robot_uid,
+                joint_ids=self.non_fixed_joint_ids,
+                robot_state_ranges=self.robot_state_ranges,
+                start_state=self.start_state,
+                goal_state=self.goal_state,
+                obstacle_positions=self.obstacle_positions,
+                obstacle_dimensions=self.obstacle_dimensions,
+                check_collision_fn=self.check_collision,
+                use_goal_reached_fn=True,
+                check_goal_reached_fn=self.check_goal_reached,
+            )
+        else:
+            self.path_planner.set_env(
+                robot_uid=self.robot_uid,
+                joint_ids=self.non_fixed_joint_ids,
+                robot_state_ranges=self.robot_state_ranges,
+                start_state=self.start_state,
+                goal_state=self.goal_state,
+                obstacle_positions=self.obstacle_positions,
+                obstacle_dimensions=self.obstacle_dimensions,
+                check_collision_fn=self.check_collision,
+            )
 
     def plan_path(self):
         self.path, self.num_samples = self.path_planner.plan_path()

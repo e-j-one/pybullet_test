@@ -27,6 +27,8 @@ class PathPlanner:
         obstacle_positions: List[Tuple[float, float, float]],
         obstacle_dimensions: List[Tuple[float, float, float]],
         check_collision_fn: Callable[[RobotState], bool],
+        use_goal_reached_fn: bool,
+        check_goal_reached_fn=None,
     ):
         """
         Parameters
@@ -44,6 +46,8 @@ class PathPlanner:
         self.obstacle_positions = obstacle_positions
         self.obstacle_dimensions = obstacle_dimensions
         self.check_collision_fn = check_collision_fn
+        self.use_goal_reached_fn = use_goal_reached_fn
+        self.check_goal_reached_fn = check_goal_reached_fn
 
     def _is_state_in_collision(self, robot_state: RobotState) -> bool:
         return self.check_collision_fn(robot_state)

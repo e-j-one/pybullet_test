@@ -49,6 +49,23 @@ def get_end_effector_position(robot_uid: int) -> Tuple[float, float, float]:
     return end_effector_position
 
 
+def get_end_effector_position_from_robot_state(
+    robot_uid: int, joint_ids: List[int], robot_state: RobotState
+) -> Tuple[float, float, float]:
+    set_base_and_joint_positions(robot_uid, joint_ids, robot_state)
+    # Get the state of the end-effector link (ee_link)
+    end_effector_state = p.getLinkState(
+        bodyUniqueId=robot_uid,
+        linkIndex=6,  # The index of the end-effector link (usually the last link)
+        computeForwardKinematics=True,
+    )
+
+    # The position of the end-effector is the first element of the link state
+    end_effector_position = end_effector_state[4]
+
+    return end_effector_position
+
+
 def get_joint_limits(robot_uid: int, joint_ids: List[int]) -> List[Tuple[float, float]]:
     joint_limits = []
     for joint_id in joint_ids:

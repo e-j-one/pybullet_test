@@ -58,6 +58,8 @@ class RrtPlanner(PathPlanner):
         obstacle_positions: List[Tuple[float, float, float]],
         obstacle_dimensions: List[Tuple[float, float, float]],
         check_collision_fn: Callable[[RobotState], bool],
+        use_goal_reached_fn: bool = False,
+        check_goal_reached_fn=None,
     ):
         super().set_env(
             robot_uid,
@@ -68,6 +70,8 @@ class RrtPlanner(PathPlanner):
             obstacle_positions,
             obstacle_dimensions,
             check_collision_fn,
+            use_goal_reached_fn=use_goal_reached_fn,
+            check_goal_reached_fn=check_goal_reached_fn,
         )
 
     def _initialize_tree(self):
@@ -122,6 +126,9 @@ class RrtPlanner(PathPlanner):
         return self.tree.add_node(robot_state=robot_state, parent_idx=parent_idx)
 
     def _is_goal_reached(self, robot_state: RobotState) -> bool:
+        if self.use_goal_reached_fn:
+            return self.check_goal_reached_fn(robot_state, self.goal_reached_threshold)
+
         if (
             np.linalg.norm(np.array(robot_state) - np.array(self.goal_state))
             < self.goal_reached_threshold
@@ -134,7 +141,12 @@ class RrtPlanner(PathPlanner):
             self.tree.add_node(self.goal_state, parent_node_idx)
 
     def _get_path_to_goal(self) -> List[RobotState]:
-        path = self.tree.get_path_from_tree(self.goal_state)
+        if self.use_goal_reached_fn:
+            path = self.tree.get_path_from_tree(
+                self.tree.get_robot_state_of_node(self.goal_reached_node_idx)
+            )
+        else:
+            path = self.tree.get_path_from_tree(self.goal_state)
         if path is None:
             raise ValueError("Cannot find path to goal")
         return path
@@ -198,7 +210,10 @@ class RrtPlanner(PathPlanner):
 
             if self._is_goal_reached(robot_state=new_robot_state):
                 print("==================== Goal reached ====================")
-                self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
+                if self.use_goal_reached_fn:
+                    self.goal_reached_node_idx = new_node_idx
+                else:
+                    self._add_goal_state_if_not_in_tree(parent_node_idx=new_node_idx)
                 path_found = True
                 break
 

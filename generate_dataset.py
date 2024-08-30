@@ -26,7 +26,7 @@ def generate_dataset(
     planner_config = {
         "max_iter": 100000,
         "collision_check_step_size": 0.04,
-        "goal_reached_threshold": 0.04,
+        "goal_reached_threshold": 0.05,
         # rrt
         "drive_dist": 0.628,
         "goal_sample_rate": 0.1,
@@ -35,7 +35,7 @@ def generate_dataset(
     }
     robot_urdf_path = "urdf/ur5.urdf"
 
-    dataset_dir = dataset_dir + str(rail_length) + str(num_obstacles) + "/"
+    dataset_dir = dataset_dir + str(rail_length) + "_" + str(num_obstacles) + "/"
 
     # Create the dataset directory if it does not exist
     if not os.path.exists(dataset_dir):
@@ -69,6 +69,7 @@ def generate_dataset(
         (
             start_state,
             goal_state,
+            goal_end_effector_pos,
             rail_length,
             obstacle_positions,
             obstacle_dimensions,
@@ -80,6 +81,7 @@ def generate_dataset(
             goal_state=goal_state,
             obstacle_positions=obstacle_positions,
             obstacle_dimensions=obstacle_dimensions,
+            use_goal_reached_fn=True,
         )
         arm_on_rail_env.set_path_planner_env()
 
@@ -112,11 +114,13 @@ def generate_dataset(
         map_data = {
             "start_state": start_state,
             "goal_state": goal_state,
+            "goal_end_effector_pos": goal_end_effector_pos,
             "rail_length": rail_length,
             "obstacle_positions": obstacle_positions,
             "obstacle_dimensions": obstacle_dimensions,
             "planner_config": planner_config,
             "rrt_star_path": sbmp_path,
+            "num_samples": num_samples,
         }
 
         file_path = dataset_dir + str(map_seed) + ".json"
