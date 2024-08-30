@@ -34,7 +34,7 @@ def get_env_config_demo() -> Tuple[
     """
     start_state = (0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
     goal_state = (3.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
-    rail_length = 3.0
+    rail_length = 4.0
     # goal_ee_pos = [0.162, -0.192, 0.906]
 
     obstacle_positions = [
@@ -42,7 +42,7 @@ def get_env_config_demo() -> Tuple[
         [0.0, 0.5, 0.0],
         [0.0, 0.0, 0.5],
         # [1.5, 0.0, 0.5],
-        [1.5, -1.5, 0.9],
+        [1.5, -1.5, 0.8],
     ]
     obstacle_dimensions = [
         # [0.2, 0.1, 0.1],
@@ -62,7 +62,7 @@ def get_env_config_demo() -> Tuple[
 
 def test_rrt_star():
     planner_config = {
-        "max_iter": 16000,
+        "max_iter": 80000,
         "collision_check_step_size": 0.04,
         "goal_reached_threshold": 0.04,
         # rrt

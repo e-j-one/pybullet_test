@@ -181,12 +181,13 @@ class RrtPlanner(PathPlanner):
                 robot_state_j=new_robot_state,
             )
 
+            print("iter   : ", sample_iter)
             print("random : ", [f"{x:.2f}" for x in random_robot_state])
             print("nearest: ", [f"{x:.2f}" for x in nearest_node_robot_state])
             print("new    : ", [f"{x:.2f}" for x in new_robot_state])
 
             # pdb.set_trace()
-            input("Press Enter to continue...")
+            # input("Press Enter to continue...")
 
             new_node_idx = self._add_node_to_tree(
                 robot_state=new_robot_state, parent_idx=nearest_node_idx
