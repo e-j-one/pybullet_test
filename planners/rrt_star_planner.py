@@ -72,7 +72,9 @@ class RrtStarPlanner(RrtPlanner):
         Reset the tree to start a new planning
         Reset tree and add the start state to the tree
         """
-        self.tree = RrtStarTree()
+        self.tree = RrtStarTree(
+            near_node_dist_trheshold=self.near_radius,
+        )
         self.tree.add_root(self.start_state)
 
     def _sample_robot_state(self) -> RobotState:
@@ -93,6 +95,100 @@ class RrtStarPlanner(RrtPlanner):
         self, robot_state_i: RobotState, robot_state_j: RobotState
     ) -> bool:
         return super()._is_collision_between_states(robot_state_i, robot_state_j)
+
+    def _get_collision_free_near_nodes(
+        self, new_node_pos: Tuple[float, float], near_nodes_idx: List[int]
+    ):
+        collision_free_near_nodes_idx = []
+        cost_to_collision_free_near_nodes = []
+        for near_node_idx in near_nodes_idx:
+            if not self._check_collision_between_pos(
+                self.tree.get_pos_of_node(near_node_idx), new_node_pos
+            ):
+                collision_free_near_nodes_idx.append(near_node_idx)
+                cost_to_collision_free_near_nodes.append(
+                    self._get_cost_between_pos(
+                        self.tree.get_pos_of_node(near_node_idx), new_node_pos
+                    )
+                )
+        return collision_free_near_nodes_idx, cost_to_collision_free_near_nodes
+
+    def _find_collision_free_near_nodes(
+        self, new_robot_state: RobotState
+    ) -> Tuple[List[int], List[float]]:
+        """
+        Returns
+        -------
+        collision_free_near_nodes_idx: List[int]
+            List of indices of near nodes that have a collision-free path to the new node
+        cost_to_collision_free_near_nodes: List[float]
+            List of costs to the near nodes that have a collision-free path to the new node
+        """
+        near_node_idxes = self.tree.find_near_nodes(new_robot_state)
+
+        collision_free_near_node_idxes = []
+        cost_to_collision_free_near_nodes = []
+
+        for near_node_idx in near_node_idxes:
+            near_node_robot_state = self.tree.get_robot_state_of_node(near_node_idx)
+            if self._is_collision_between_states(
+                near_node_robot_state, new_robot_state
+            ):
+                continue
+
+            collision_free_near_node_idxes.append(near_node_idx)
+            cost_to_collision_free_near_nodes.append(
+                GeometryUtils.get_cost_between_states(
+                    near_node_robot_state, new_robot_state
+                )
+            )
+
+        return collision_free_near_node_idxes, cost_to_collision_free_near_nodes
+
+    def _find_optimal_parent_and_add_node_to_tree(
+        self,
+        new_robot_state: RobotState,
+        collision_free_near_node_idxes: List[int],
+        cost_to_collision_free_near_nodes: List[float],
+    ) -> int:
+        """
+        Find the parent node with the minimum cost and collision-free path
+        Add the new node to the tree
+
+        Returns
+        -------
+        new_node_idx: int
+        """
+        return self.tree.find_optimal_parent_and_add_node_to_tree(
+            new_robot_state=new_robot_state,
+            collision_free_near_node_idxes=collision_free_near_node_idxes,
+            cost_to_collision_free_near_nodes=cost_to_collision_free_near_nodes,
+        )
+
+    def _rewire_tree(
+        self,
+        new_node_idx: int,
+        collision_free_near_node_idxes: List[int],
+        cost_to_collision_free_near_nodes: List[float],
+    ):
+        """
+        Rewire the tree to update the parent of near nodes if a collision-free path is found with the new node
+        Assuming cost(a,b) = cost(b,a) for all a, b
+        """
+        cost_of_new_node = self.tree.get_cost_of_node_idx(new_node_idx)
+
+        for near_node_idx, cost_to_near_node in zip(
+            collision_free_near_node_idxes, cost_to_collision_free_near_nodes
+        ):
+            updated_cost = cost_of_new_node + cost_to_near_node
+
+            if updated_cost < self.tree.get_cost_of_node_idx(near_node_idx):
+                self.tree.update_parent_and_cost(
+                    node_idx=near_node_idx,
+                    new_parent_idx=new_node_idx,
+                    new_cost=updated_cost,
+                    new_cost_from_parent=cost_to_near_node,
+                )
 
     def _add_node_to_tree(
         self,
@@ -116,6 +212,16 @@ class RrtStarPlanner(RrtPlanner):
 
     def _get_path_to_goal(self) -> List[RobotState]:
         return super()._get_path_to_goal()
+
+    def _plot_debugline_between_robot_states(
+        self, robot_state_i: RobotState, robot_state_j: RobotState
+    ):
+        PlotUtils.plot_end_effector_line_between_robot_states(
+            robot_uid=self.robot_uid,
+            joint_ids=self.joint_ids,
+            robot_state_i=robot_state_i,
+            robot_state_j=robot_state_j,
+        )
 
     def plan_path(self) -> List[RobotState]:
         """
@@ -157,56 +263,28 @@ class RrtStarPlanner(RrtPlanner):
             ):
                 continue
 
-            # collision_free_near_nodes_idx, cost_to_collision_free_near_nodes = (
-            #     self._find_collision_free_near_nodes(new_robot_state)
-            # )
+            collision_free_near_node_idxes, cost_to_collision_free_near_nodes = (
+                self._find_collision_free_near_nodes(new_robot_state)
+            )
 
-            # near_nodes_idx = self.tree.find_near_nodes(new_node_pos)
+            new_node_idx = self._find_optimal_parent_and_add_node_to_tree(
+                new_robot_state,
+                collision_free_near_node_idxes,
+                cost_to_collision_free_near_nodes,
+            )
 
-            # collision_free_near_nodes_idx, cost_to_collision_free_near_nodes = (
-            #     self._get_collision_free_near_nodes(new_node_pos, near_nodes_idx)
-            # )
-
-            # new_node_idx = self.tree.find_optimal_parent_and_add_node_to_tree(
-            #     new_node_pos,
-            #     collision_free_near_nodes_idx,
-            #     cost_to_collision_free_near_nodes,
-            # )
-
-            # # Rewire tree
-            # self._rewire_tree(new_node_idx, near_nodes_idx)
-
-            # # check if goal is reached
-            # if self._check_goal_reached(new_node_pos, goal_pos):
-            #     path_found = True
-            #     if not self.tree.check_if_pos_in_tree(goal_pos):
-            #         cost_to_goal = self._get_cost_between_pos(new_node_pos, goal_pos)
-            #         self.tree.add_node(
-            #             goal_pos,
-            #             new_node_idx,
-            #             self.tree.get_cost_of_node_idx(new_node_idx) + cost_to_goal,
-            #             cost_to_goal,
-            #         )
-            #     break
-
-            # PlotUtils.plot_end_effector_line_between_robot_states(
-            #     robot_uid=self.robot_uid,
-            #     joint_ids=self.joint_ids,
-            #     robot_state_i=nearest_node_robot_state,
-            #     robot_state_j=new_robot_state,
-            # )
+            self._rewire_tree(
+                new_node_idx,
+                collision_free_near_node_idxes,
+                cost_to_collision_free_near_nodes,
+            )
 
             # print("iter   : ", sample_iter)
             # print("random : ", [f"{x:.2f}" for x in random_robot_state])
             # print("nearest: ", [f"{x:.2f}" for x in nearest_node_robot_state])
             # print("new    : ", [f"{x:.2f}" for x in new_robot_state])
 
-            # pdb.set_trace()
             # input("Press Enter to continue...")
-
-            new_node_idx = self._add_node_to_tree(
-                robot_state=new_robot_state, parent_idx=nearest_node_idx
-            )
 
             if self._is_goal_reached(robot_state=new_robot_state):
                 print("==================== Goal reached ====================")
