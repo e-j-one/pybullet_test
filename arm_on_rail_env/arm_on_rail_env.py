@@ -13,9 +13,11 @@ class ArmOnRailEnv:
     def __init__(self):
         pass
 
+    def set_robot_urdf_path(self, robot_urdf_path):
+        self.robot_urdf_path = robot_urdf_path
+
     def reset_env(
         self,
-        robot_urdf_path: str,
         rail_length: float,
         start_state: RobotState,
         goal_state: RobotState,
@@ -37,7 +39,7 @@ class ArmOnRailEnv:
 
         # spawn plane, robot and obstacles
         self.plane_uid = p.loadURDF("plane.urdf")
-        self.robot_uid = bullet_obj_utils.spawn_robot(urdf_path=robot_urdf_path)
+        self.robot_uid = bullet_obj_utils.spawn_robot(urdf_path=self.robot_urdf_path)
         spawned_obstacle_uids = bullet_obj_utils.spawn_obstacles(
             obstacle_positions, obstacle_dimensions
         )
@@ -52,7 +54,7 @@ class ArmOnRailEnv:
         )
 
         p.resetDebugVisualizerCamera(
-            cameraDistance=rail_length,
+            cameraDistance=rail_length * 1.5,
             cameraYaw=0,
             cameraPitch=-150,
             # cameraPitch=-45,

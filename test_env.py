@@ -37,8 +37,8 @@ def test_rrt_star():
     arm_on_rail_env = ArmOnRailEnv()
 
     # =============================== get collision checker ===============================
+    arm_on_rail_env.set_robot_urdf_path(robot_urdf_path="urdf/ur5.urdf")
     arm_on_rail_env.reset_env(
-        robot_urdf_path="urdf/ur5.urdf",
         rail_length=rail_length,
         start_state=start_state,
         goal_state=goal_state,

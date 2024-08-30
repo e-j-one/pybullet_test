@@ -44,6 +44,7 @@ def generate_dataset(
     num_samples_collected = 0
 
     arm_on_rail_env = ArmOnRailEnv()
+    arm_on_rail_env.set_robot_urdf_path(robot_urdf_path=robot_urdf_path)
     data_generator = ArmOnRailDataGenerator()
     data_generator.set_config(
         rail_length=rail_length,
@@ -63,7 +64,6 @@ def generate_dataset(
         ) = data_generator.sample_new_map_data()
 
         arm_on_rail_env.reset_env(
-            robot_urdf_path=robot_urdf_path,
             rail_length=rail_length,
             start_state=start_state,
             goal_state=goal_state,
