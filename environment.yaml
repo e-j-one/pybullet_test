@@ -22,8 +22,20 @@ dependencies:
   - xz=5.4.6=h5eee18b_1
   - zlib=1.2.13=h5eee18b_1
   - pip:
+      - contourpy==1.1.1
+      - cycler==0.12.1
+      - fonttools==4.53.1
+      - importlib-resources==6.4.4
+      - kiwisolver==1.4.5
+      - matplotlib==3.7.5
       - numpy==1.24.4
+      - packaging==24.1
+      - pillow==10.4.0
       - pybullet==3.2.6
+      - pyparsing==3.1.4
+      - python-dateutil==2.9.0.post0
+      - scipy==1.10.1
       - six==1.16.0
       - tqdm==4.66.5
-prefix: /home/jwlee/anaconda3/envs/pb
+      - zipp==3.20.1
+prefix: /home/hojun/anaconda3/envs/pb
