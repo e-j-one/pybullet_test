@@ -1,18 +1,14 @@
-import numpy as np
 import time
 
 import pybullet as p
-import pybullet_data
+import numpy as np
 
 from dataset_generator.arm_on_rail_data_generator import ArmOnRailDataGenerator
 
 from planners.rrt_planner import RrtPlanner
 from planners.rrt_star_planner import RrtStarPlanner
-
+from env.arm_on_rail_env import ArmOnRailEnv
 import utils.plot_utils as plot_utils
-import utils.bullet_obj_utils as bullet_obj_utils
-from utils.collision_utils import get_check_collision_fn
-
 
 SEED = 0
 np.random.seed(SEED)
@@ -30,11 +26,6 @@ def test_rrt_star():
         "near_radius": 0.648,
     }
     test_algo = "rrt_star"
-    # =============================== init sim ===============================
-    p.connect(p.GUI)
-    p.setAdditionalSearchPath(pybullet_data.getDataPath())
-
-    urdf_path = "urdf/ur5.urdf"
 
     # =============================== get env ===============================
     data_generator = ArmOnRailDataGenerator()
@@ -42,57 +33,25 @@ def test_rrt_star():
         data_generator.get_env_config_demo()
     )
 
-    # =============================== spawn objects ===============================
-    # spawn plane
-    plane_uid = p.loadURDF("plane.urdf")
+    # =============================== get env ===============================
+    arm_on_rail_env = ArmOnRailEnv()
 
-    # spawn robot
-    robot_uid = bullet_obj_utils.spawn_robot(urdf_path=urdf_path)
-    non_fixed_joint_ids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
-
-    # spawn obstacles
-    spawned_obstacle_uids = bullet_obj_utils.spawn_obstacles(
-        obstacle_positions, obstacle_dimensions
-    )
-    obstacle_uids = [plane_uid] + spawned_obstacle_uids
-    plot_utils.plot_rail(rail_length=rail_length)
-
-    # =============================== set and plot env ===============================
-
-    bullet_obj_utils.set_base_and_joint_positions(
-        robot_uid=robot_uid, joint_ids=non_fixed_joint_ids, robot_state=goal_state
-    )
-    goal_ee_pos = bullet_obj_utils.get_end_effector_position(robot_uid)
-
-    bullet_obj_utils.set_base_and_joint_positions(
-        robot_uid=robot_uid, joint_ids=non_fixed_joint_ids, robot_state=start_state
-    )
-    start_ee_pos = bullet_obj_utils.get_end_effector_position(robot_uid)
-
-    plot_utils.plot_start_and_goal_pos(start_ee_pos, goal_ee_pos)
-
-    p.resetDebugVisualizerCamera(
-        cameraDistance=rail_length,
-        cameraYaw=0,
-        cameraPitch=-150,
-        # cameraPitch=-45,
-        cameraTargetPosition=[rail_length * 0.5, 0.0, 0.0],
-    )
     # =============================== get collision checker ===============================
-
-    check_collision = get_check_collision_fn(
-        robot_uid=robot_uid,
-        joint_ids=non_fixed_joint_ids,
-        obstacles=obstacle_uids,
+    arm_on_rail_env.reset_env(
+        robot_urdf_path="urdf/ur5.urdf",
         rail_length=rail_length,
+        start_state=start_state,
+        goal_state=goal_state,
+        obstacle_positions=obstacle_positions,
+        obstacle_dimensions=obstacle_dimensions,
     )
 
     # =============================== plan path ===============================
 
-    robot_state_ranges = bullet_obj_utils.get_robot_state_ranges(
-        robot_uid=robot_uid, joint_ids=non_fixed_joint_ids, rail_length=rail_length
-    )
-    # print("robot_state_ranges: ", robot_state_ranges)
+    robot_uid = arm_on_rail_env.get_robot_uid()
+    non_fixed_joint_ids = arm_on_rail_env.get_non_fixed_joint_ids()
+    robot_state_ranges = arm_on_rail_env.get_robot_state_ranges()
+    check_collision = arm_on_rail_env.get_check_collision_fn()
 
     num_samples = -1
     if test_algo == "rrt":
