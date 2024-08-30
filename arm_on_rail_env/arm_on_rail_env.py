@@ -15,7 +15,37 @@ class ArmOnRailEnv:
 
     Example usage
     -------------
+    arm_on_rail_env = ArmOnRailEnv()
+    arm_on_rail_env.set_robot_urdf_path(robot_urdf_path=robot_urdf_path)
+    if read from json:
+        arm_on_rail_env.load_env_from_json(
+            json_file_path=dataset_path,
+        )
+        arm_on_rail_env.plot_path_label()
+    else:
+        arm_on_rail_env.reset_env(
+            rail_length=rail_length,
+            start_state=start_state,
+            goal_state=goal_state,
+            obstacle_positions=obstacle_positions,
+            obstacle_dimensions=obstacle_dimensions,
+        )
 
+    # set path planner
+    path_planner = RrtStarPlanner(
+        max_iter=planner_config["max_iter"],
+        collision_check_step_size=planner_config["collision_check_step_size"],
+        goal_reached_threshold=planner_config["goal_reached_threshold"],
+        drive_dist=planner_config["drive_dist"],
+        goal_sample_rate=planner_config["goal_sample_rate"],
+        near_radius=planner_config["near_radius"],
+    )
+    arm_on_rail_env.set_path_planner(path_planner)
+    arm_on_rail_env.set_path_planner_env()
+
+    sbmp_path, num_samples = arm_on_rail_env.plan_path()
+    arm_on_rail_env.plot_path()
+    arm_on_rail_env.close_sim_env()
 
     """
 

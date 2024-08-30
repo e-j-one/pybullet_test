@@ -1,4 +1,4 @@
-from typing import Tuple, List, Callable
+from typing import Tuple, List, Callable, Optional
 
 from planners.rrt_planner import RrtPlanner
 from planners.utils.rrt_trees import RrtStarTree
@@ -231,7 +231,7 @@ class RrtStarPlanner(RrtPlanner):
             robot_state_j=robot_state_j,
         )
 
-    def plan_path(self) -> List[RobotState]:
+    def plan_path(self) -> Optional[List[RobotState]]:
         """
         Plan a path from start to goal using RRT algorithm
 
@@ -245,6 +245,11 @@ class RrtStarPlanner(RrtPlanner):
         6-2. Find the parent node with the minimum cost and collision-free path
         6-3. Rewire the tree
         7. Repeat 2-6 until goal is reached or max_iter is reached
+
+        Returns
+        -------
+        None if path is not found
+        List of robot states in the path if path is found
         """
 
         self._initialize_tree()
