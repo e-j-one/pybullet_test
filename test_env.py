@@ -7,7 +7,7 @@ from dataset_generator.arm_on_rail_data_generator import ArmOnRailDataGenerator
 
 from planners.rrt_planner import RrtPlanner
 from planners.rrt_star_planner import RrtStarPlanner
-from env.arm_on_rail_env import ArmOnRailEnv
+from arm_on_rail_env.arm_on_rail_env import ArmOnRailEnv
 import utils.plot_utils as plot_utils
 
 SEED = 0
