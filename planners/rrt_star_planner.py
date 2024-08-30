@@ -1,23 +1,16 @@
-from typing import Tuple, Optional, List, Callable
+from typing import Tuple, List, Callable
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-from planners.path_planner import PathPlanner
-from planners.utils.rrt_trees import RrtTree
+from planners.rrt_planner import RrtPlanner
+from planners.utils.rrt_trees import RrtStarTree
 import planners.utils.geometry_utils as GeometryUtils
 
 from utils.types import RobotState
 import utils.plot_utils as PlotUtils
 
-import pdb
 
-
-# from planners.utils.line_algorithm import line_algorithm
-# from planners.trees.rrt_trees import RrtTree
-
-
-class RrtPlanner(PathPlanner):
+class RrtStarPlanner(RrtPlanner):
     def __init__(
         self,
         max_iter: int,
@@ -27,6 +20,7 @@ class RrtPlanner(PathPlanner):
         goal_reached_threshold: float,
         drive_dist: float,
         goal_sample_rate: float,
+        near_radius: float,
     ):
         """
         Parameters
@@ -41,6 +35,8 @@ class RrtPlanner(PathPlanner):
             Distance to drive from the nearest node to the sampled node
         collision_check_step_size: float
             Step size to check for collision between states
+        near_radius: float
+            Radius to find near nodes in the tree
         """
         super().__init__(
             max_iter=max_iter,
@@ -48,9 +44,10 @@ class RrtPlanner(PathPlanner):
             robot_state_ranges=robot_state_ranges,
             collision_check_step_size=collision_check_step_size,
             goal_reached_threshold=goal_reached_threshold,
+            drive_dist=drive_dist,
+            goal_sample_rate=goal_sample_rate,
         )
-        self.drive_dist = drive_dist
-        self.goal_sample_rate = goal_sample_rate
+        self.near_radius = near_radius
 
     def set_env(
         self,
@@ -75,69 +72,50 @@ class RrtPlanner(PathPlanner):
         Reset the tree to start a new planning
         Reset tree and add the start state to the tree
         """
-        self.tree = RrtTree()
+        self.tree = RrtStarTree()
         self.tree.add_root(self.start_state)
 
     def _sample_robot_state(self) -> RobotState:
-        """
-        Sample a random robot state within the self.robot_state_ranges
-        For goal_sample_rate probability, return the goal state, else return a random state
-        """
-
-        if np.random.uniform() < self.goal_sample_rate:
-            return self.goal_state
-
-        sampled_robot_state = []
-        for state_range in self.robot_state_ranges:
-            sampled_robot_state.append(
-                np.random.uniform(state_range[0], state_range[1])
-            )
-        return tuple(sampled_robot_state)
+        return super()._sample_robot_state()
 
     def _find_nearest_node(self, robot_state: RobotState) -> Tuple[int, RobotState]:
-        nearest_node = self.tree.find_nearest_node(robot_state)
-        return nearest_node.get_idx(), nearest_node.get_robot_state()
+        return super()._find_nearest_node(robot_state)
 
     def _steer(
         self, nearest_node_robot_state: RobotState, sampled_robot_state: RobotState
     ) -> RobotState:
-        """
-        Drive from nearest node to sampled node by a distance of self.drive_dist
-        """
-        return GeometryUtils.move_state_towards_target(
-            start_state=nearest_node_robot_state,
-            target_state=sampled_robot_state,
-            step_size=self.drive_dist,
-        )
+        return super()._steer(nearest_node_robot_state, sampled_robot_state)
 
     def _is_state_already_in_tree(self, robot_state: RobotState) -> bool:
-        return self.tree.check_if_robot_state_already_in_tree(robot_state)
+        return super()._is_state_already_in_tree(robot_state)
 
     def _is_collision_between_states(
         self, robot_state_i: RobotState, robot_state_j: RobotState
     ) -> bool:
         return super()._is_collision_between_states(robot_state_i, robot_state_j)
 
-    def _add_node_to_tree(self, robot_state: RobotState, parent_idx: int) -> int:
-        return self.tree.add_node(robot_state=robot_state, parent_idx=parent_idx)
+    def _add_node_to_tree(
+        self,
+        robot_state: RobotState,
+        parent_idx: int,
+        cost: float,
+        cost_from_parent: float,
+    ) -> int:
+        return self.tree.add_node(
+            robot_state=robot_state,
+            parent_idx=parent_idx,
+            cost=cost,
+            cost_from_parent=cost_from_parent,
+        )
 
     def _is_goal_reached(self, robot_state: RobotState) -> bool:
-        if (
-            np.linalg.norm(np.array(robot_state) - np.array(self.goal_state))
-            < self.goal_reached_threshold
-        ):
-            return True
-        return False
+        return super()._is_goal_reached(robot_state)
 
     def _add_goal_state_if_not_in_tree(self, parent_node_idx):
-        if not self.tree.check_if_robot_state_already_in_tree(self.goal_state):
-            self.tree.add_node(self.goal_state, parent_node_idx)
+        return super()._add_goal_state_if_not_in_tree(parent_node_idx)
 
     def _get_path_to_goal(self) -> List[RobotState]:
-        path = self.tree.get_path_from_tree(self.goal_state)
-        if path is None:
-            raise ValueError("Cannot find path to goal")
-        return path
+        return super()._get_path_to_goal()
 
     def plan_path(self) -> List[RobotState]:
         """
@@ -149,7 +127,9 @@ class RrtPlanner(PathPlanner):
         4. Drive from nearest node to random point
         5. Check collision
             If collision, go to 2
-        6. Add new node to the tree
+        6-1. Find near nodes
+        6-2. Find the parent node with the minimum cost and collision-free path
+        6-3. Rewire the tree
         7. Repeat 2-6 until goal is reached or max_iter is reached
         """
 
@@ -177,12 +157,44 @@ class RrtPlanner(PathPlanner):
             ):
                 continue
 
-            PlotUtils.plot_end_effector_line_between_robot_states(
-                robot_uid=self.robot_uid,
-                joint_ids=self.joint_ids,
-                robot_state_i=nearest_node_robot_state,
-                robot_state_j=new_robot_state,
-            )
+            # collision_free_near_nodes_idx, cost_to_collision_free_near_nodes = (
+            #     self._find_collision_free_near_nodes(new_robot_state)
+            # )
+
+            # near_nodes_idx = self.tree.find_near_nodes(new_node_pos)
+
+            # collision_free_near_nodes_idx, cost_to_collision_free_near_nodes = (
+            #     self._get_collision_free_near_nodes(new_node_pos, near_nodes_idx)
+            # )
+
+            # new_node_idx = self.tree.find_optimal_parent_and_add_node_to_tree(
+            #     new_node_pos,
+            #     collision_free_near_nodes_idx,
+            #     cost_to_collision_free_near_nodes,
+            # )
+
+            # # Rewire tree
+            # self._rewire_tree(new_node_idx, near_nodes_idx)
+
+            # # check if goal is reached
+            # if self._check_goal_reached(new_node_pos, goal_pos):
+            #     path_found = True
+            #     if not self.tree.check_if_pos_in_tree(goal_pos):
+            #         cost_to_goal = self._get_cost_between_pos(new_node_pos, goal_pos)
+            #         self.tree.add_node(
+            #             goal_pos,
+            #             new_node_idx,
+            #             self.tree.get_cost_of_node_idx(new_node_idx) + cost_to_goal,
+            #             cost_to_goal,
+            #         )
+            #     break
+
+            # PlotUtils.plot_end_effector_line_between_robot_states(
+            #     robot_uid=self.robot_uid,
+            #     joint_ids=self.joint_ids,
+            #     robot_state_i=nearest_node_robot_state,
+            #     robot_state_j=new_robot_state,
+            # )
 
             # print("iter   : ", sample_iter)
             # print("random : ", [f"{x:.2f}" for x in random_robot_state])
