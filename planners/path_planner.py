@@ -1,10 +1,8 @@
-from enum import Enum
-from typing import List, Tuple, Optional, Callable
+from typing import List, Tuple, Callable
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-import planners.utils.geometry_utils as GeometryUtils
+import utils.geometry_utils as GeometryUtils
 from utils.types import RobotState
 
 

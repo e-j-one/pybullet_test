@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 
-
+# from
 from utils.types import RobotState
 
 
@@ -22,9 +22,29 @@ class ArmOnRailDataGenerator:
     def __init__(self):
         pass
 
-    def set_config(self, rail_length: float, num_obstacles: int):
+    def set_config(
+        self,
+        rail_length: float,
+        num_obstacles: int,
+        min_state_dist_threshold: float = 0.5,
+    ):
         self.rail_length = rail_length
+        self.num_joints = 6
         self.num_obstacles = num_obstacles
+        self.min_state_dist_threshold = min_state_dist_threshold
+
+    def _sample_robot_state(self) -> RobotState:
+        """
+        Sample a random robot state
+        """
+        # 2d_x in [0, rail_length], 2d_y = 0, 2d_yaw = 0
+        state = []
+        for i in range(self.num_joints + 1):
+            if i == 0:
+                state.append(np.random.uniform(0, self.rail_length))
+                continue
+            state.append(np.random.uniform(-np.pi, np.pi))
+        return Tuple(state)
 
     def sample_new_map_data(self) -> Tuple[
         RobotState,
@@ -33,6 +53,9 @@ class ArmOnRailDataGenerator:
         List[Tuple[float, float, float]],
         List[Tuple[float, float, float]],
     ]:
+        start_state = self._sample_robot_state()
+        goal_state = self._sample_robot_state()
+
         pass
 
     def get_env_config_demo(self) -> Tuple[

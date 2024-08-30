@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 from planners.path_planner import PathPlanner
 from planners.utils.rrt_trees import RrtTree
-import planners.utils.geometry_utils as GeometryUtils
 
-from utils.types import RobotState
+import utils.geometry_utils as GeometryUtils
 import utils.plot_utils as PlotUtils
+from utils.types import RobotState
 
 import pdb
 

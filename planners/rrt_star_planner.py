@@ -1,13 +1,11 @@
 from typing import Tuple, List, Callable
 
-import numpy as np
-
 from planners.rrt_planner import RrtPlanner
 from planners.utils.rrt_trees import RrtStarTree
-import planners.utils.geometry_utils as GeometryUtils
 
-from utils.types import RobotState
+import utils.geometry_utils as GeometryUtils
 import utils.plot_utils as PlotUtils
+from utils.types import RobotState
 
 
 class RrtStarPlanner(RrtPlanner):
