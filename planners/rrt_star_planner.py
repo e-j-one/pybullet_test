@@ -271,6 +271,10 @@ class RrtStarPlanner(RrtPlanner):
                 cost_to_collision_free_near_nodes,
             )
 
+            self._plot_debugline_between_robot_states(
+                nearest_node_robot_state, new_robot_state
+            )
+
             self._rewire_tree(
                 new_node_idx,
                 collision_free_near_node_idxes,

@@ -71,11 +71,11 @@ def get_check_collision_fn(
         )
 
         if base_position[0] < 0 or base_position[0] > rail_length:
-            print("Robot is out of rail")
+            # print("Robot is out of rail")
             return True
 
         if not is_joint_state_in_limits(robot_uid=robot_uid, joint_states=joint_states):
-            print("Joint state is out of limits")
+            # print("Joint state is out of limits")
             return True
 
         bullet_obj_utils.set_base_and_joint_positions(
@@ -84,15 +84,15 @@ def get_check_collision_fn(
 
         for link1, link2 in non_adjacent_pairs:
             if is_link_in_collision(robot_uid, link1, link2):
-                print(f"Link {link1} and Link {link2} are in collision")
+                # print(f"Link {link1} and Link {link2} are in collision")
                 return True
 
         for pair in check_body_uid_pairs:
             if is_body_in_collision(pair[0], pair[1]):
-                print(f"Body {pair[0]} and Body {pair[1]} are in collision")
+                # print(f"Body {pair[0]} and Body {pair[1]} are in collision")
                 return True
 
-        print("No collision")
+        # print("No collision")
         return False
 
     return is_collision_fn

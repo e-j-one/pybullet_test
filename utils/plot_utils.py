@@ -86,7 +86,7 @@ def plot_rail(
     return rail_uid
 
 
-def plot_path_forever(
+def plot_path(
     path: List[RobotState],
     joint_ids: List[int],
     robot_uid: int,
@@ -94,13 +94,15 @@ def plot_path_forever(
     plot_end_effector_poses: bool = True,
     marker_radius=0.01,
     marker_color=[0, 0, 1, 0.5],
+    num_repeat: int = 4,
 ):
     """
     Parameters
     ----------
     path : List[RobotState]
     """
-    while True:
+    repeat_count = 0
+    while repeat_count < num_repeat:
         if plot_end_effector_poses:
             for state_on_path in path:
                 bullet_obj_utils.set_base_and_joint_positions(
@@ -125,3 +127,26 @@ def plot_path_forever(
                 robot_uid=robot_uid, joint_ids=joint_ids, robot_state=state_on_path
             )
             time.sleep(hold_time)
+
+        repeat_count += 1
+
+
+def plot_path_forever(
+    path: List[RobotState],
+    joint_ids: List[int],
+    robot_uid: int,
+    hold_time: float = 0.2,
+    plot_end_effector_poses: bool = True,
+    marker_radius=0.01,
+    marker_color=[0, 0, 1, 0.5],
+):
+    plot_path(
+        path=path,
+        joint_ids=joint_ids,
+        robot_uid=robot_uid,
+        hold_time=hold_time,
+        plot_end_effector_poses=plot_end_effector_poses,
+        marker_radius=marker_radius,
+        marker_color=marker_color,
+        num_repeat=int(1e6),
+    )

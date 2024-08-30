@@ -1,4 +1,5 @@
 import time
+import json
 
 import pybullet as p
 import numpy as np
@@ -21,7 +22,7 @@ def generate_dataset(
     dataset_dir="datasets/train/",
 ):
     planner_config = {
-        "max_iter": 80000,
+        "max_iter": 100000,
         "collision_check_step_size": 0.04,
         "goal_reached_threshold": 0.04,
         # rrt
@@ -98,16 +99,19 @@ def generate_dataset(
         print("n sample: ", num_samples)
 
         if sbmp_path is not None:
-            plot_utils.plot_path_forever(
+            plot_utils.plot_path(
                 path=sbmp_path,
                 joint_ids=non_fixed_joint_ids,
                 robot_uid=robot_uid,
                 plot_end_effector_poses=True,
+                num_repeat=4,
             )
 
-        while p.isConnected():
-            pass
-            # p.stepSimulation()
+        arm_on_rail_env.close_sim_env()
+
+        # while p.isConnected():
+        #     pass
+        # p.stepSimulation()
 
 
 if __name__ == "__main__":
