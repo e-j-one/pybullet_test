@@ -141,28 +141,21 @@ if __name__ == "__main__":
             "num_data_to_collect": 2000,
             "rail_length": 1.0,
             "num_obstacles": 4,
-            "max_iter": 80000,
+            "max_iter": 40000,
         },
         {
             "start_seed": 0,
             "num_data_to_collect": 2000,
             "rail_length": 2.0,
             "num_obstacles": 8,
-            "max_iter": 160000,
-        },
-        {
-            "start_seed": 0,
-            "num_data_to_collect": 2000,
-            "rail_length": 3.0,
-            "num_obstacles": 12,
-            "max_iter": 240000,
+            "max_iter": 80000,
         },
         {
             "start_seed": 0,
             "num_data_to_collect": 2000,
             "rail_length": 4.0,
             "num_obstacles": 16,
-            "max_iter": 320000,
+            "max_iter": 80000,
         },
     ]
 
