@@ -49,9 +49,9 @@ def test_collision_check():
 
     obstacle_uids = [plane_uid] + spawned_obstacle_uids
 
-    non_fixed_joint_uids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
+    non_fixed_joint_ids = bullet_obj_utils.get_non_fixed_joints(robot_uid)
 
-    is_collision = get_collision_fn(robot_uid, non_fixed_joint_uids, obstacle_uids)
+    is_collision = get_collision_fn(robot_uid, non_fixed_joint_ids, obstacle_uids)
 
     for joint_state in joint_states:
         print(is_collision(joint_state))
