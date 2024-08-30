@@ -17,14 +17,14 @@ np.random.seed(SEED)
 
 def generate_dataset(
     start_seed=0,
-    num_samples=2000,
+    num_data_to_collect=2000,
     rail_length=3.0,
     num_obstacles=10,
     max_iter=1000000,
     dataset_dir="datasets/train/",
 ):
     planner_config = {
-        "max_iter": 100000,
+        "max_iter": max_iter,
         "collision_check_step_size": 0.04,
         "goal_reached_threshold": 0.05,
         # rrt
@@ -61,9 +61,9 @@ def generate_dataset(
     )
 
     map_seed = start_seed
-    num_samples_collected = 0
+    num_data_collected = 0
 
-    while num_samples_collected < num_samples:
+    while num_data_collected < num_data_to_collect:
         map_seed += 1
         np.random.seed(map_seed)
         (
@@ -127,7 +127,7 @@ def generate_dataset(
         with open(file_path, "w") as json_file:
             json.dump(map_data, json_file, indent=4)
 
-        num_samples_collected += 1
+        num_data_collected += 1
         # while p.isConnected():
         #     pass
         # p.stepSimulation()
@@ -138,28 +138,28 @@ if __name__ == "__main__":
     dataset_configs = [
         {
             "start_seed": 0,
-            "num_samples": 2000,
+            "num_data_to_collect": 2000,
             "rail_length": 1.0,
             "num_obstacles": 4,
             "max_iter": 80000,
         },
         {
             "start_seed": 0,
-            "num_samples": 2000,
+            "num_data_to_collect": 2000,
             "rail_length": 2.0,
             "num_obstacles": 8,
             "max_iter": 160000,
         },
         {
             "start_seed": 0,
-            "num_samples": 2000,
+            "num_data_to_collect": 2000,
             "rail_length": 3.0,
             "num_obstacles": 12,
             "max_iter": 240000,
         },
         {
             "start_seed": 0,
-            "num_samples": 2000,
+            "num_data_to_collect": 2000,
             "rail_length": 4.0,
             "num_obstacles": 16,
             "max_iter": 320000,
@@ -168,10 +168,10 @@ if __name__ == "__main__":
 
     for config in dataset_configs:
         generate_dataset(
-            start_seed=SEED,
-            num_samples=config["num_samples"],
+            start_seed=config["start_seed"],
+            num_data_to_collect=config["num_data_to_collect"],
             rail_length=config["rail_length"],
             num_obstacles=config["num_obstacles"],
-            max_iter=1000000,
+            max_iter=config["max_iter"],
             dataset_dir=dataset_dir,
         )
