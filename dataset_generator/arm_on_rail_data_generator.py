@@ -26,6 +26,15 @@ class ArmOnRailDataGenerator:
         self.rail_length = rail_length
         self.num_obstacles = num_obstacles
 
+    def sample_new_map_data(self) -> Tuple[
+        RobotState,
+        RobotState,
+        float,
+        List[Tuple[float, float, float]],
+        List[Tuple[float, float, float]],
+    ]:
+        pass
+
     def get_env_config_demo(self) -> Tuple[
         RobotState,
         RobotState,

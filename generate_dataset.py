@@ -14,7 +14,7 @@ SEED = 0
 np.random.seed(SEED)
 
 
-def test_rrt_star():
+def generate_dataset():
     planner_config = {
         "max_iter": 80000,
         "collision_check_step_size": 0.04,
@@ -29,6 +29,10 @@ def test_rrt_star():
 
     # =============================== get env ===============================
     data_generator = ArmOnRailDataGenerator()
+    data_generator.set_config(
+        rail_length=3.0,
+        num_obstacles=4,
+    )
     start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions = (
         data_generator.get_env_config_demo()
     )
@@ -107,4 +111,4 @@ def test_rrt_star():
 
 
 if __name__ == "__main__":
-    test_rrt_star()
+    generate_dataset()
