@@ -25,7 +25,9 @@ def generate_dataset():
         # rrt star
         "near_radius": 0.648,
     }
-    test_algo = "rrt_star"
+
+    # =============================== get env ===============================
+    arm_on_rail_env = ArmOnRailEnv()
 
     # =============================== get env ===============================
     data_generator = ArmOnRailDataGenerator()
@@ -34,11 +36,8 @@ def generate_dataset():
         num_obstacles=4,
     )
     start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions = (
-        data_generator.get_env_config_demo()
+        data_generator.sample_new_map_data()
     )
-
-    # =============================== get env ===============================
-    arm_on_rail_env = ArmOnRailEnv()
 
     # =============================== get collision checker ===============================
     arm_on_rail_env.reset_env(
@@ -50,6 +49,10 @@ def generate_dataset():
         obstacle_dimensions=obstacle_dimensions,
     )
 
+    if arm_on_rail_env.is_initial_state_in_collision():
+        print("Initial state is in collision")
+        return
+
     # =============================== plan path ===============================
 
     robot_uid = arm_on_rail_env.get_robot_uid()
@@ -57,28 +60,16 @@ def generate_dataset():
     robot_state_ranges = arm_on_rail_env.get_robot_state_ranges()
     check_collision = arm_on_rail_env.get_check_collision_fn()
 
-    num_samples = -1
-    if test_algo == "rrt":
-        motion_planner = RrtPlanner(
-            max_iter=planner_config["max_iter"],
-            joint_ids=non_fixed_joint_ids,
-            robot_state_ranges=robot_state_ranges,
-            collision_check_step_size=planner_config["collision_check_step_size"],
-            goal_reached_threshold=planner_config["goal_reached_threshold"],
-            drive_dist=planner_config["drive_dist"],
-            goal_sample_rate=planner_config["goal_sample_rate"],
-        )
-    elif test_algo == "rrt_star":
-        motion_planner = RrtStarPlanner(
-            max_iter=planner_config["max_iter"],
-            joint_ids=non_fixed_joint_ids,
-            robot_state_ranges=robot_state_ranges,
-            collision_check_step_size=planner_config["collision_check_step_size"],
-            goal_reached_threshold=planner_config["goal_reached_threshold"],
-            drive_dist=planner_config["drive_dist"],
-            goal_sample_rate=planner_config["goal_sample_rate"],
-            near_radius=planner_config["near_radius"],
-        )
+    motion_planner = RrtStarPlanner(
+        max_iter=planner_config["max_iter"],
+        joint_ids=non_fixed_joint_ids,
+        robot_state_ranges=robot_state_ranges,
+        collision_check_step_size=planner_config["collision_check_step_size"],
+        goal_reached_threshold=planner_config["goal_reached_threshold"],
+        drive_dist=planner_config["drive_dist"],
+        goal_sample_rate=planner_config["goal_sample_rate"],
+        near_radius=planner_config["near_radius"],
+    )
 
     motion_planner.set_env(
         robot_uid=robot_uid,
