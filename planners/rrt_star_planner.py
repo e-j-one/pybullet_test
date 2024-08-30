@@ -206,7 +206,17 @@ class RrtStarPlanner(RrtPlanner):
         return super()._is_goal_reached(robot_state)
 
     def _add_goal_state_if_not_in_tree(self, parent_node_idx):
-        return super()._add_goal_state_if_not_in_tree(parent_node_idx)
+        if not self.tree.check_if_robot_state_already_in_tree(self.goal_state):
+            parent_node_cost = self.tree.get_cost_of_node_idx(parent_node_idx)
+            cost_from_parent_to_goal = GeometryUtils.get_cost_between_states(
+                self.tree.get_robot_state_of_node(parent_node_idx), self.goal_state
+            )
+            self.tree.add_node(
+                self.goal_state,
+                parent_node_idx,
+                parent_node_cost + cost_from_parent_to_goal,
+                cost_from_parent_to_goal,
+            )
 
     def _get_path_to_goal(self) -> List[RobotState]:
         return super()._get_path_to_goal()

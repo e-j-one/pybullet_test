@@ -11,6 +11,14 @@ from utils.types import RobotState
 
 
 class ArmOnRailEnv:
+    """
+
+    Example usage
+    -------------
+
+
+    """
+
     def __init__(self):
         pass
 
@@ -20,9 +28,15 @@ class ArmOnRailEnv:
     def load_env_from_json(self, json_file_path: str):
         with open(json_file_path, "r") as f:
             env_data = json.load(f)
-        self.reset_env(**env_data)
+        self.reset_env(
+            rail_length=env_data["rail_length"],
+            start_state=tuple(env_data["start_state"]),
+            goal_state=tuple(env_data["goal_state"]),
+            obstacle_positions=env_data["obstacle_positions"],
+            obstacle_dimensions=env_data["obstacle_dimensions"],
+        )
 
-        self.path_label = env_data["path_label"]
+        self.path_label = env_data["rrt_star_path"]
 
     def reset_env(
         self,
@@ -35,6 +49,7 @@ class ArmOnRailEnv:
         """
         Connect to the pybullet GUI and reset the environment with the given config.
         Spawn the robot, obstacles and set the start and goal states.
+        Get collision checker function.
         """
         # init sim env
         p.connect(p.GUI)
@@ -60,6 +75,9 @@ class ArmOnRailEnv:
             joint_ids=self.non_fixed_joint_ids,
             rail_length=rail_length,
         )
+        print("robot_state_ranges: ", self.robot_state_ranges)
+        self.robot_state_ranges[2] = (-3.141592, 0.0)
+        print("robot_state_ranges: ", self.robot_state_ranges)
 
         p.resetDebugVisualizerCamera(
             cameraDistance=rail_length * 1.5,
@@ -123,3 +141,31 @@ class ArmOnRailEnv:
 
     def set_path_planner(self, path_planner):
         self.path_planner = path_planner
+
+    def set_path_planner_env(self):
+        self.path_planner.set_env(
+            robot_uid=self.robot_uid,
+            joint_ids=self.non_fixed_joint_ids,
+            robot_state_ranges=self.robot_state_ranges,
+            start_state=self.start_state,
+            goal_state=self.goal_state,
+            obstacle_positions=self.obstacle_positions,
+            obstacle_dimensions=self.obstacle_dimensions,
+            check_collision_fn=self.check_collision,
+        )
+
+    def plan_path(self):
+        self.path, self.num_samples = self.path_planner.plan_path()
+        return self.path, self.num_samples
+
+    def plot_path(self, num_repeat=1):
+        if self.path is None:
+            print("Can't plot path: Path is None")
+            return
+        plot_utils.plot_path(
+            path=self.path,
+            joint_ids=self.non_fixed_joint_ids,
+            robot_uid=self.robot_uid,
+            plot_end_effector_poses=True,
+            num_repeat=num_repeat,
+        )
