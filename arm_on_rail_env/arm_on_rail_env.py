@@ -75,9 +75,6 @@ class ArmOnRailEnv:
             joint_ids=self.non_fixed_joint_ids,
             rail_length=rail_length,
         )
-        print("robot_state_ranges: ", self.robot_state_ranges)
-        self.robot_state_ranges[2] = (-3.141592, 0.0)
-        print("robot_state_ranges: ", self.robot_state_ranges)
 
         p.resetDebugVisualizerCamera(
             cameraDistance=rail_length * 1.5,

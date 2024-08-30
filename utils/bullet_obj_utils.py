@@ -61,10 +61,12 @@ def get_joint_limits(robot_uid: int, joint_ids: List[int]) -> List[Tuple[float, 
 
 
 def get_robot_state_ranges(
-    robot_uid: int, joint_ids: List[int], rail_length: int
+    robot_uid: int, joint_ids: List[int], rail_length: int, limit_shoulder_joint=True
 ) -> List[Tuple[float, float]]:
     robot_state_ranges = [(0, rail_length)]
     joint_limits = get_joint_limits(robot_uid, joint_ids)
+    if limit_shoulder_joint:
+        joint_limits[1] = (-3.141592, 0.0)
     robot_state_ranges += joint_limits
     return robot_state_ranges
 
