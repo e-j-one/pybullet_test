@@ -158,6 +158,9 @@ class RrtPlanner(PathPlanner):
         path_found = False
 
         for sample_iter in range(self.max_iter):
+            if sample_iter % 1000 == 0:
+                print(f"iter: {sample_iter}")
+
             random_robot_state = self._sample_robot_state()
 
             nearest_node_idx, nearest_node_robot_state = self._find_nearest_node(
@@ -181,10 +184,10 @@ class RrtPlanner(PathPlanner):
                 robot_state_j=new_robot_state,
             )
 
-            print("iter   : ", sample_iter)
-            print("random : ", [f"{x:.2f}" for x in random_robot_state])
-            print("nearest: ", [f"{x:.2f}" for x in nearest_node_robot_state])
-            print("new    : ", [f"{x:.2f}" for x in new_robot_state])
+            # print("iter   : ", sample_iter)
+            # print("random : ", [f"{x:.2f}" for x in random_robot_state])
+            # print("nearest: ", [f"{x:.2f}" for x in nearest_node_robot_state])
+            # print("new    : ", [f"{x:.2f}" for x in new_robot_state])
 
             # pdb.set_trace()
             # input("Press Enter to continue...")

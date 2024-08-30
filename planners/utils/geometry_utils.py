@@ -20,3 +20,17 @@ def move_state_towards_target(
         return target_state
     progressed_state = start_state + step_size * delta / delta_norm
     return tuple(progressed_state)
+
+
+def get_distance_between_states(
+    state_i: RobotState,
+    state_j: RobotState,
+) -> float:
+    return np.linalg.norm(np.array(state_i) - np.array(state_j))
+
+
+def get_cost_between_states(
+    state_i: RobotState,
+    state_j: RobotState,
+) -> float:
+    return get_distance_between_states(state_i, state_j)

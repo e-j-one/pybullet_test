@@ -6,8 +6,10 @@ import pybullet as p
 import pybullet_data
 
 from planners.rrt_planner import RrtPlanner
-import utils.bullet_obj_utils as bullet_obj_utils
+from planners.rrt_star_planner import RrtStarPlanner
+
 import utils.plot_utils as plot_utils
+import utils.bullet_obj_utils as bullet_obj_utils
 from utils.collision_utils import get_check_collision_fn
 from utils.types import RobotState
 
@@ -68,7 +70,10 @@ def test_rrt_star():
         # rrt
         "drive_dist": 0.314,
         "goal_sample_rate": 0.05,
+        # rrt star
+        "near_radius": 0.648,
     }
+    test_algo = "rrt_star"
     # =============================== init sim ===============================
     p.connect(p.GUI)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -149,17 +154,30 @@ def test_rrt_star():
     )
     # print("robot_state_ranges: ", robot_state_ranges)
 
-    # rrt
-    rrt_planner = RrtPlanner(
-        max_iter=planner_config["max_iter"],
-        joint_ids=non_fixed_joint_ids,
-        robot_state_ranges=robot_state_ranges,
-        collision_check_step_size=planner_config["collision_check_step_size"],
-        goal_reached_threshold=planner_config["goal_reached_threshold"],
-        drive_dist=planner_config["drive_dist"],
-        goal_sample_rate=planner_config["goal_sample_rate"],
-    )
-    rrt_planner.set_env(
+    num_samples = -1
+    if test_algo == "rrt":
+        motion_planner = RrtPlanner(
+            max_iter=planner_config["max_iter"],
+            joint_ids=non_fixed_joint_ids,
+            robot_state_ranges=robot_state_ranges,
+            collision_check_step_size=planner_config["collision_check_step_size"],
+            goal_reached_threshold=planner_config["goal_reached_threshold"],
+            drive_dist=planner_config["drive_dist"],
+            goal_sample_rate=planner_config["goal_sample_rate"],
+        )
+    elif test_algo == "rrt_star":
+        motion_planner = RrtStarPlanner(
+            max_iter=planner_config["max_iter"],
+            joint_ids=non_fixed_joint_ids,
+            robot_state_ranges=robot_state_ranges,
+            collision_check_step_size=planner_config["collision_check_step_size"],
+            goal_reached_threshold=planner_config["goal_reached_threshold"],
+            drive_dist=planner_config["drive_dist"],
+            goal_sample_rate=planner_config["goal_sample_rate"],
+            near_radius=planner_config["near_radius"],
+        )
+
+    motion_planner.set_env(
         robot_uid=robot_uid,
         start_state=start_state,
         goal_state=goal_state,
@@ -167,21 +185,20 @@ def test_rrt_star():
         obstacle_dimensions=obstacle_dimensions,
         check_collision_fn=check_collision,
     )
-    rrt_path, num_samples = rrt_planner.plan_path()
+    sbmp_path, num_samples = motion_planner.plan_path()
 
-    # print("rrt_path: ", rrt_path)
     print("n sample: ", num_samples)
 
-    # rrt_path = [
+    # sbmp_path = [
     #     start_state,
     #     goal_state,
     # ]
 
     # =============================== plot path ===============================
 
-    if rrt_path is not None:
+    if sbmp_path is not None:
         plot_utils.plot_path_forever(
-            path=rrt_path,
+            path=sbmp_path,
             joint_ids=non_fixed_joint_ids,
             robot_uid=robot_uid,
             plot_end_effector_poses=True,

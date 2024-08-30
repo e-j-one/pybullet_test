@@ -128,7 +128,7 @@ class RrtStarTree(RrtTree):
         assert len(self.nodes) == 0
         return self.add_node(root_pos, None, 0, 0)
 
-    def propagate_cost_to_children(self, node_idx: int):
+    def _propagate_cost_to_children(self, node_idx: int):
         for child_idx in self.nodes[node_idx].child_indexes:
             updated_cost = (
                 self.nodes[node_idx].get_cost()
@@ -136,13 +136,13 @@ class RrtStarTree(RrtTree):
             )
 
             self.nodes[child_idx].update_cost(updated_cost)
-            self.propagate_cost_to_children(child_idx)
+            self._propagate_cost_to_children(child_idx)
 
     def find_near_nodes(self, new_robot_state: RobotState) -> List[int]:
-        near_nodes_idx = self.kd_tree.query_ball_point(
+        near_node_idxes = self.kd_tree.query_ball_point(
             np.array([new_robot_state]), self.near_node_dist_trheshold
         )
-        return near_nodes_idx[0]
+        return near_node_idxes[0]
 
     def get_cost_of_robot_state(self, robot_state: RobotState) -> float:
         if robot_state not in self.robot_states_to_idx_map:
@@ -168,16 +168,18 @@ class RrtStarTree(RrtTree):
         )
         self.nodes[new_parent_idx].add_child(node_idx)
 
+        self._propagate_cost_to_children(node_idx)
+
     def find_optimal_parent_and_add_node_to_tree(
         self,
         new_robot_state: RobotState,
-        collision_free_near_nodes_idx: List[int],
+        collision_free_near_node_idxes: List[int],
         cost_to_collision_free_near_nodes: List[float],
     ) -> Tuple[int, float]:
         optimal_parent = None
         min_cost = float("inf")
         cost_to_parent = None
-        for iter_idx, near_node_idx in enumerate(collision_free_near_nodes_idx):
+        for iter_idx, near_node_idx in enumerate(collision_free_near_node_idxes):
             cost_via_near_node = (
                 self.nodes[near_node_idx].get_cost()
                 + cost_to_collision_free_near_nodes[iter_idx]
