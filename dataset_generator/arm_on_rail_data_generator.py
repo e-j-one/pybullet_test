@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Tuple
 import numpy as np
-import matplotlib.pyplot as plt
-import datetime
+
+
+from utils.types import RobotState
 
 
 class ArmOnRailDataGenerator:
@@ -18,13 +19,56 @@ class ArmOnRailDataGenerator:
     """
 
     # map_size: height and width of the map [float, float]
-    def __init__(self, map_size=[64, 128]):
-        self.width = map_size[0]
-        self.height = map_size[1]
+    def __init__(self):
+        pass
 
-        self.start_idx = []
-        self.goal_idx = []
-        self.reset_map()
+    def set_config(self, rail_length: float, num_obstacles: int):
+        self.rail_length = rail_length
+        self.num_obstacles = num_obstacles
+
+    def get_env_config_demo(self) -> Tuple[
+        RobotState,
+        RobotState,
+        float,
+        List[Tuple[float, float, float]],
+        List[Tuple[float, float, float]],
+    ]:
+        """
+        Return a env config for testing.
+        In rail env, 2d_x in [0, rail_length], 2d_y = 0, 2d_yaw = 0 for robot state.
+
+        Returns
+        -------
+        start_state, goal_state, rail_length, obstacle_positions, obstacle_dimensions
+
+        state: np.ndarray (2d_x, 2d_y, 2d_yaw, joint_0, joint_1, joint_2, joint_3, joint_4, joint_5)
+        """
+        start_state = (0.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
+        goal_state = (3.0, 3.14, -np.pi * 0.4, 0.0, 0.0, 0.0, 0.0)
+        rail_length = 4.0
+        # goal_ee_pos = [0.162, -0.192, 0.906]
+
+        obstacle_positions = [
+            # [0.5, 0.0, 0.0],
+            [0.0, 0.5, 0.0],
+            [0.0, 0.0, 0.5],
+            # [1.5, 0.0, 0.5],
+            [1.5, -1.5, 0.8],
+        ]
+        obstacle_dimensions = [
+            # [0.2, 0.1, 0.1],
+            [0.1, 0.3, 0.1],
+            [0.1, 0.1, 0.4],
+            # [0.1, 0.1, 0.4],
+            [0.1, 3.0, 0.4],
+        ]
+        return (
+            start_state,
+            goal_state,
+            rail_length,
+            obstacle_positions,
+            obstacle_dimensions,
+        )
 
     # def reset_map(self):
     #     """
