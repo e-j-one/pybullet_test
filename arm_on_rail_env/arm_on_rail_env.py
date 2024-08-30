@@ -99,6 +99,9 @@ class ArmOnRailEnv:
     def get_robot_state_ranges(self):
         return self.robot_state_ranges
 
+    def get_obstacle_uids(self):
+        return self.obstacle_uids
+
     def get_check_collision_fn(self):
         return self.check_collision
 
