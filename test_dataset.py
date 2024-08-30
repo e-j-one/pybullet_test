@@ -40,6 +40,7 @@ def test_dataset():
     arm_on_rail_env.load_env_from_json(
         json_file_path=dataset_path,
     )
+    arm_on_rail_env.plot_path_label()
 
     path_planner = RrtStarPlanner(
         max_iter=planner_config["max_iter"],

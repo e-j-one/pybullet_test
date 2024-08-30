@@ -166,3 +166,16 @@ class ArmOnRailEnv:
             plot_end_effector_poses=True,
             num_repeat=num_repeat,
         )
+
+    def plot_path_label(self):
+        if self.path_label is None:
+            print("Can't plot path: Path is None")
+            return
+        plot_utils.plot_path(
+            path=self.path_label,
+            joint_ids=self.non_fixed_joint_ids,
+            robot_uid=self.robot_uid,
+            plot_end_effector_poses=True,
+            num_repeat=2,
+            marker_color=(1, 0, 0, 0.7),
+        )
