@@ -1,3 +1,4 @@
+import os
 import time
 import json
 
@@ -15,6 +16,7 @@ np.random.seed(SEED)
 
 
 def generate_dataset(
+    start_seed=0,
     num_samples=2000,
     rail_length=3.0,
     num_obstacles=10,
@@ -33,6 +35,12 @@ def generate_dataset(
     }
     robot_urdf_path = "urdf/ur5.urdf"
 
+    dataset_dir = dataset_dir + str(rail_length) + "/"
+
+    # Create the dataset directory if it does not exist
+    if not os.path.exists(dataset_dir):
+        os.makedirs(dataset_dir)
+
     num_samples_collected = 0
 
     arm_on_rail_env = ArmOnRailEnv()
@@ -42,7 +50,10 @@ def generate_dataset(
         num_obstacles=num_obstacles,
     )
 
+    map_seed = start_seed
+
     while num_samples_collected < num_samples:
+        np.random.seed(map_seed)
         (
             start_state,
             goal_state,
@@ -104,15 +115,64 @@ def generate_dataset(
                 joint_ids=non_fixed_joint_ids,
                 robot_uid=robot_uid,
                 plot_end_effector_poses=True,
-                num_repeat=4,
+                num_repeat=1,
             )
 
         arm_on_rail_env.close_sim_env()
 
+        map_data = {
+            "start_state": start_state,
+            "goal_state": goal_state,
+            "rail_length": rail_length,
+            "obstacle_positions": obstacle_positions,
+            "obstacle_dimensions": obstacle_dimensions,
+            "planner_config": planner_config,
+            "sbmp_path": sbmp_path,
+        }
+
+        file_path = dataset_dir + str(map_seed) + ".json"
+
+        # Write the data to a JSON file
+        with open(file_path, "w") as json_file:
+            json.dump(map_data, json_file)
+
+        map_seed += 1
         # while p.isConnected():
         #     pass
         # p.stepSimulation()
 
 
 if __name__ == "__main__":
-    generate_dataset()
+    dataset_dir = "datasets/train_240831/"
+    dataset_configs = [
+        {
+            "num_samples": 2000,
+            "rail_length": 1.0,
+            "num_obstacles": 4,
+        },
+        {
+            "num_samples": 2000,
+            "rail_length": 2.0,
+            "num_obstacles": 8,
+        },
+        {
+            "num_samples": 2000,
+            "rail_length": 3.0,
+            "num_obstacles": 12,
+        },
+        {
+            "num_samples": 2000,
+            "rail_length": 4.0,
+            "num_obstacles": 16,
+        },
+    ]
+
+    for config in dataset_configs:
+        generate_dataset(
+            start_seed=SEED,
+            num_samples=config["num_samples"],
+            rail_length=config["rail_length"],
+            num_obstacles=config["num_obstacles"],
+            max_iter=1000000,
+            dataset_dir=dataset_dir,
+        )
