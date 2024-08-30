@@ -11,8 +11,8 @@ from planners.rrt_star_planner import RrtStarPlanner
 from arm_on_rail_env.arm_on_rail_env import ArmOnRailEnv
 import utils.plot_utils as plot_utils
 
-SEED = 1
-np.random.seed(SEED)
+# SEED = 1
+# np.random.seed(SEED)
 
 
 def generate_dataset(

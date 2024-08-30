@@ -89,7 +89,7 @@ class ArmOnRailDataGenerator:
         start_state, goal_state, goal_end_effector_pos, rail_length, obstacle_positions, obstacle_dimensions
         """
 
-        p.connect(p.GUI)
+        p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.plane_uid = p.loadURDF("plane.urdf")
         self.robot_uid = bullet_obj_utils.spawn_robot(urdf_path=self.robot_urdf_path)

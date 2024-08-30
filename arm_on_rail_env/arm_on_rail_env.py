@@ -91,7 +91,7 @@ class ArmOnRailEnv:
 
         """
         # init sim env
-        p.connect(p.GUI)
+        p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
         self.start_state = start_state
