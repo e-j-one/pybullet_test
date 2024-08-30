@@ -1,4 +1,5 @@
 from typing import Tuple, List
+import json
 
 import pybullet as p
 import pybullet_data
@@ -15,6 +16,13 @@ class ArmOnRailEnv:
 
     def set_robot_urdf_path(self, robot_urdf_path):
         self.robot_urdf_path = robot_urdf_path
+
+    def load_env_from_json(self, json_file_path: str):
+        with open(json_file_path, "r") as f:
+            env_data = json.load(f)
+        self.reset_env(**env_data)
+
+        self.path_label = env_data["path_label"]
 
     def reset_env(
         self,

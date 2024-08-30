@@ -12,8 +12,6 @@ class RrtStarPlanner(RrtPlanner):
     def __init__(
         self,
         max_iter: int,
-        joint_ids: List[int],
-        robot_state_ranges: List[Tuple[float, float]],
         collision_check_step_size: float,
         goal_reached_threshold: float,
         drive_dist: float,
@@ -38,8 +36,6 @@ class RrtStarPlanner(RrtPlanner):
         """
         super().__init__(
             max_iter=max_iter,
-            joint_ids=joint_ids,
-            robot_state_ranges=robot_state_ranges,
             collision_check_step_size=collision_check_step_size,
             goal_reached_threshold=goal_reached_threshold,
             drive_dist=drive_dist,
@@ -50,6 +46,8 @@ class RrtStarPlanner(RrtPlanner):
     def set_env(
         self,
         robot_uid: int,
+        joint_ids: List[int],
+        robot_state_ranges: List[Tuple[float, float]],
         start_state: RobotState,
         goal_state: RobotState,
         obstacle_positions: List[Tuple[float, float, float]],
@@ -58,6 +56,8 @@ class RrtStarPlanner(RrtPlanner):
     ):
         super().set_env(
             robot_uid,
+            joint_ids,
+            robot_state_ranges,
             start_state,
             goal_state,
             obstacle_positions,

@@ -57,8 +57,6 @@ def test_rrt_star():
     if test_algo == "rrt":
         motion_planner = RrtPlanner(
             max_iter=planner_config["max_iter"],
-            joint_ids=non_fixed_joint_ids,
-            robot_state_ranges=robot_state_ranges,
             collision_check_step_size=planner_config["collision_check_step_size"],
             goal_reached_threshold=planner_config["goal_reached_threshold"],
             drive_dist=planner_config["drive_dist"],
@@ -67,8 +65,6 @@ def test_rrt_star():
     elif test_algo == "rrt_star":
         motion_planner = RrtStarPlanner(
             max_iter=planner_config["max_iter"],
-            joint_ids=non_fixed_joint_ids,
-            robot_state_ranges=robot_state_ranges,
             collision_check_step_size=planner_config["collision_check_step_size"],
             goal_reached_threshold=planner_config["goal_reached_threshold"],
             drive_dist=planner_config["drive_dist"],
@@ -78,6 +74,8 @@ def test_rrt_star():
 
     motion_planner.set_env(
         robot_uid=robot_uid,
+        joint_ids=non_fixed_joint_ids,
+        robot_state_ranges=robot_state_ranges,
         start_state=start_state,
         goal_state=goal_state,
         obstacle_positions=obstacle_positions,

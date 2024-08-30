@@ -35,7 +35,7 @@ def generate_dataset(
     }
     robot_urdf_path = "urdf/ur5.urdf"
 
-    dataset_dir = dataset_dir + str(rail_length) + "/"
+    dataset_dir = dataset_dir + str(rail_length) + str(num_obstacles) + "/"
 
     # Create the dataset directory if it does not exist
     if not os.path.exists(dataset_dir):
@@ -127,7 +127,7 @@ def generate_dataset(
             "obstacle_positions": obstacle_positions,
             "obstacle_dimensions": obstacle_dimensions,
             "planner_config": planner_config,
-            "sbmp_path": sbmp_path,
+            "rrt_star_path": sbmp_path,
         }
 
         file_path = dataset_dir + str(map_seed) + ".json"

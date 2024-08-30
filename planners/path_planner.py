@@ -10,20 +10,18 @@ class PathPlanner:
     def __init__(
         self,
         max_iter: int,
-        joint_ids: List[int],
-        robot_state_ranges: List[Tuple[float, float]],
         collision_check_step_size: float,
         goal_reached_threshold: float,
     ):
         self.max_iter = max_iter
-        self.joint_ids = joint_ids
-        self.robot_state_ranges = robot_state_ranges
         self.collision_check_step_size = collision_check_step_size
         self.goal_reached_threshold = goal_reached_threshold
 
     def set_env(
         self,
         robot_uid: int,
+        joint_ids: List[int],
+        robot_state_ranges: List[Tuple[float, float]],
         start_state: RobotState,
         goal_state: RobotState,
         obstacle_positions: List[Tuple[float, float, float]],
@@ -39,6 +37,8 @@ class PathPlanner:
         obstacle_dimensions: W x L x H
         """
         self.robot_uid = robot_uid
+        self.joint_ids = joint_ids
+        self.robot_state_ranges = robot_state_ranges
         self.start_state = start_state
         self.goal_state = goal_state
         self.obstacle_positions = obstacle_positions
